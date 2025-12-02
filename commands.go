@@ -48,15 +48,15 @@ func RegisterCommands(session *discordgo.Session) {
 
 func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 
-	if interaction.Type != discordgo.InteractionApplicationCommand {
-		return
-	}
-
 	if interaction.Type == discordgo.InteractionModalSubmit {
 		switch interaction.ModalSubmitData().CustomID {
-		case "add-disciplina-modal":
+		case "add-discipline-modal":
 			controller.AddDiscipline(s, interaction)
 		}
+	}
+
+	if interaction.Type != discordgo.InteractionApplicationCommand {
+		return
 	}
 
 	switch interaction.ApplicationCommandData().Name {

@@ -166,8 +166,9 @@ func InsertIntoTable(conn *sql.DB, tableName string, columns []string, values []
 		}
 	}
 	query += ")"
-
+	log.Println(values)
 	stmt, _ := conn.Prepare(query)
+	defer stmt.Close()
 	sqlResult, err := stmt.Exec(values...)
 
 	if err != nil {
@@ -181,4 +182,50 @@ func InsertIntoTable(conn *sql.DB, tableName string, columns []string, values []
 
 	log.Printf("Inserted into %s with ID: %d", tableName, returnedID)
 	return returnedID
+}
+
+func SelectById(conn *sql.DB, tableName string, id int64) map[string]interface{} {
+	query := "SELECT * FROM " + tableName + " WHERE id = ?"
+
+	rows, _ := conn.Query(query, id)
+	results, _ := convertRowsToMap(rows)
+	if len(results) > 0 {
+		return results[0]
+	}
+	return nil
+}
+
+func convertRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	results := []map[string]interface{}{}
+
+	for rows.Next() {
+		columnPointers := make([]interface{}, len(columns))
+		columnValues := make([]interface{}, len(columns))
+		for i := range columnPointers {
+			columnPointers[i] = &columnValues[i]
+		}
+
+		if err := rows.Scan(columnPointers...); err != nil {
+			return nil, err
+		}
+
+		rowMap := make(map[string]interface{})
+		for i, colName := range columns {
+			val := columnValues[i]
+			b, ok := val.([]byte)
+			if ok {
+				rowMap[colName] = string(b)
+			} else {
+				rowMap[colName] = val
+			}
+		}
+
+		results = append(results, rowMap)
+	}
+	return results, nil
 }
