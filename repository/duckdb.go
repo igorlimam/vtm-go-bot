@@ -149,3 +149,36 @@ func CheckDDL(db *sql.DB) {
 	}
 
 }
+
+func InsertIntoTable(conn *sql.DB, tableName string, columns []string, values []interface{}) int64 {
+	query := "INSERT INTO " + tableName + " ("
+	for i, col := range columns {
+		query += col
+		if i < len(columns)-1 {
+			query += ", "
+		}
+	}
+	query += ") VALUES ("
+	for i := range values {
+		query += "?"
+		if i < len(values)-1 {
+			query += ", "
+		}
+	}
+	query += ")"
+
+	stmt, _ := conn.Prepare(query)
+	sqlResult, err := stmt.Exec(values...)
+
+	if err != nil {
+		log.Fatalf("Failed to insert into %s: %v", tableName, err)
+	}
+
+	returnedID, err := sqlResult.LastInsertId()
+	if err != nil {
+		log.Fatalf("Failed to retrieve last insert ID: %v", err)
+	}
+
+	log.Printf("Inserted into %s with ID: %d", tableName, returnedID)
+	return returnedID
+}
