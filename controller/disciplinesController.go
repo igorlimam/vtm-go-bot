@@ -7,12 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddDiscipline(interaction *discordgo.InteractionCreate) map[string]string {
+func AddDiscipline(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
 	log.Println("AddDiscipline command invoked")
-
-	service.AddDisciplineService(interaction)
-
-	return map[string]string{
-		"status": "Discipline added successfully",
-	}
+	status := service.AddDisciplineService(interaction)["status"]
+	ResolveResponse(session, interaction, status)
 }

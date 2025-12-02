@@ -14,5 +14,5 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate) map[string]s
 	//data := interaction.ApplicationCommandData()
 
 	// Business logic to add a discipline would go here
-	return dataModal
+	return map[string]string{"status": "Disciplina adicionada com sucesso!"}
 }

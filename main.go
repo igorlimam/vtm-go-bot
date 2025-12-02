@@ -11,18 +11,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func ResolveResponse(session *discordgo.Session, interaction *discordgo.InteractionCreate, content string) {
-	session.InteractionRespond(
-		interaction.Interaction,
-		&discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: content,
-			},
-		},
-	)
-}
-
 func main() {
 
 	err := godotenv.Load()

@@ -50,7 +50,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	if interaction.Type == discordgo.InteractionModalSubmit {
 		switch interaction.ModalSubmitData().CustomID {
 		case "add-discipline-modal":
-			ResolveResponse(s, interaction, controller.AddDiscipline(interaction)["status"])
+			controller.AddDiscipline(s, interaction)
 		}
 	}
 
@@ -60,17 +60,17 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 
 	switch interaction.ApplicationCommandData().Name {
 	case "ping":
-		ResolveResponse(s, interaction, PingCommand())
+		s.InteractionRespond(
+			interaction.Interaction,
+			&discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: "Pong",
+				},
+			},
+		)
 	case "add-discipline":
 		view.AddDisciplineView(s, interaction)
 	}
 
-}
-
-func PingCommand() string {
-	log.Println("Ping command invoked")
-	//db := repository.ConnectDuckDB()
-	//defer db.Close()
-	//repository.CheckDDL(db)
-	return "pong"
 }
