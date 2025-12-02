@@ -40,16 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sess.AddHandler(func(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
-		if interaction.Type != discordgo.InteractionApplicationCommand {
-			return
-		}
-
-		switch interaction.ApplicationCommandData().Name {
-		case "ping":
-			ResolveResponse(s, interaction, PingCommand())
-		}
-	})
+	sess.AddHandler(RegisterHandlers)
 
 	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
