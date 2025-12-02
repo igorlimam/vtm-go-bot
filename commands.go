@@ -2,30 +2,29 @@ package main
 
 import (
 	"log"
+	"vtm-go-bot/repository"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 func RegisterCommands(session *discordgo.Session) {
-	commands := []*discordgo.ApplicationCommand{
-		{
-			Name:        "ping",
-			Description: "AM I ALIVE?",
-		},
-		{
-			Name:        "add-discipline",
-			Description: "Add a new discipline",
-		},
+
+	commands := map[string]string{
+		"ping":           "AM I ALIVE?",
+		"add-discipline": "Add a new discipline",
 	}
 
-	for _, command := range commands {
+	for name, description := range commands {
 		_, err := session.ApplicationCommandCreate(
 			session.State.User.ID,
 			"",
-			command,
+			&discordgo.ApplicationCommand{
+				Name:        name,
+				Description: description,
+			},
 		)
 		if err != nil {
-			log.Fatalf("Cannot create '%v' command: %v", command.Name, err)
+			log.Fatalf("Cannot create '%v' command: %v", name, err)
 		}
 	}
 
@@ -34,6 +33,9 @@ func RegisterCommands(session *discordgo.Session) {
 
 func PingCommand() string {
 	log.Println("Ping command invoked")
+	db := repository.ConnectDuckDB()
+	defer db.Close()
+	repository.CheckDDL(db)
 	return "pong"
 }
 
