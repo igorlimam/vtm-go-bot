@@ -2,9 +2,9 @@ package service
 
 import "github.com/bwmarrin/discordgo"
 
-func ModalToMap(interaction *discordgo.InteractionCreate) map[string]string {
+func ModalToMap(interaction *discordgo.InteractionCreate) map[string]interface{} {
 	dataModal := interaction.ModalSubmitData().Components
-	values := map[string]string{}
+	values := map[string]interface{}{}
 
 	for _, row := range dataModal {
 		if row, ok := row.(*discordgo.ActionsRow); ok {

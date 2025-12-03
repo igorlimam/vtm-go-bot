@@ -11,10 +11,17 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate) map[string]s
 	//log.Printf("Interaction Data: %+v\n", interaction.Data)
 	dataModal := ModalToMap(interaction)
 
-	log.Printf("Modal Data: %+v\n", dataModal)
-	//data := interaction.ApplicationCommandData()
-	log.Printf("%s, %s, %s, %s", dataModal["name"], dataModal["type"], dataModal["resonance"], dataModal["threat"])
-	discipline := repository.AddDiscipline(dataModal["name"], dataModal["type"], dataModal["resonance"], dataModal["threat"])
-	log.Printf("Inserted Discipline: %+v\n", discipline)
+	//log.Printf("Modal Data: %+v\n", dataModal)
+	//log.Printf("%s, %s, %s, %s", dataModal["discipline-name"], dataModal["discipline-type"], dataModal["discipline-resonance"], dataModal["discipline-threat"])
+
+	repository.AddDiscipline(
+		dataModal["discipline-name"].(string),
+		dataModal["discipline-type"].(string),
+		dataModal["discipline-resonance"].(string),
+		dataModal["discipline-threat"].(string),
+		dataModal["discipline-description"].(string),
+	)
+
+	log.Printf("Inserted Discipline: %s\n", dataModal["discipline-name"].(string))
 	return map[string]string{"status": "Disciplina adicionada com sucesso!"}
 }

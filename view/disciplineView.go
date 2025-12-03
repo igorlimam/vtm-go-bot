@@ -9,13 +9,13 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 			Type: discordgo.InteractionResponseModal,
 			Data: &discordgo.InteractionResponseData{
 				CustomID: "add-discipline-modal",
-				Title:    "Add New Discipline",
+				Title:    "Adicionar Nova Disciplina",
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
 							discordgo.TextInput{
 								CustomID: "discipline-name",
-								Label:    "Discipline Name",
+								Label:    "Nome da Disciplina",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -24,7 +24,7 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 						Components: []discordgo.MessageComponent{
 							discordgo.TextInput{
 								CustomID: "discipline-type",
-								Label:    "Discipline Type",
+								Label:    "Tipo da Disciplina",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -34,7 +34,7 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 
 							discordgo.TextInput{
 								CustomID: "discipline-resonance",
-								Label:    "Discipline Resonance",
+								Label:    "Ressonância da Disciplina",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -42,8 +42,17 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
 							discordgo.TextInput{
+								CustomID: "discipline-description",
+								Label:    "Descrição da Disciplina",
+								Style:    discordgo.TextInputParagraph,
+							},
+						},
+					},
+					discordgo.ActionsRow{
+						Components: []discordgo.MessageComponent{
+							discordgo.TextInput{
 								CustomID: "discipline-threat",
-								Label:    "Discipline Threat",
+								Label:    "Ameaça da Disciplina",
 								Style:    discordgo.TextInputParagraph,
 							},
 						},

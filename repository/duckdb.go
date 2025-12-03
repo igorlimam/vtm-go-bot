@@ -14,13 +14,29 @@ func ConnectDuckDB() *sql.DB {
 	}
 
 	log.Println("Connected to DuckDB successfully.")
+	CheckDDL(db)
 	return db
 }
 
 func CheckDDL(db *sql.DB) {
 	ddlQueries := []string{
+		`CREATE SEQUENCE IF NOT EXISTS discipline_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS blood_potency_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS clan_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS player_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS predator_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS power_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS note_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS story_note_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS mechanic_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS merit_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS attribute_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS skill_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS merit_level_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS attribute_level_id_seq;`,
+		`CREATE SEQUENCE IF NOT EXISTS skill_level_id_seq;`,
 		`CREATE TABLE IF NOT EXISTS BLOOD_POTENCIES (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('blood_potency_id_seq') PRIMARY KEY,
 			level INTEGER,
 			blood_surge INTEGER,
 			mend_amount INTEGER,
@@ -29,13 +45,13 @@ func CheckDDL(db *sql.DB) {
 			bane_severity INTEGER
 		)`,
 		`CREATE TABLE IF NOT EXISTS PREDATORS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('predator_id_seq') PRIMARY KEY,
 			description TEXT,
 			resonance VARCHAR,
 			bonuses TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS CLANS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('clan_id_seq') PRIMARY KEY,
 			name VARCHAR,
 			description TEXT,
 			titles TEXT,
@@ -43,7 +59,7 @@ func CheckDDL(db *sql.DB) {
 			compulsion TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS PLAYERS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('player_id_seq') PRIMARY KEY,
 			name VARCHAR,
 			chronicle VARCHAR,
 			generation INTEGER,
@@ -57,9 +73,11 @@ func CheckDDL(db *sql.DB) {
 			predator_id INTEGER REFERENCES PREDATORS(id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS DISCIPLINES (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('discipline_id_seq') PRIMARY KEY,
 			type VARCHAR,
 			name VARCHAR,
+			threat VARCHAR,
+			resonance VARCHAR,
 			description TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS CLANS_DISCIPLINES (
@@ -68,7 +86,7 @@ func CheckDDL(db *sql.DB) {
 			PRIMARY KEY (clan_id, discipline_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS POWERS(
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('power_id_seq') PRIMARY KEY,
 			discipline_id INTEGER REFERENCES DISCIPLINES(id),
 			name VARCHAR,
 			description TEXT,
@@ -86,55 +104,55 @@ func CheckDDL(db *sql.DB) {
 			PRIMARY KEY (player_id, target_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS NOTES (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('note_id_seq') PRIMARY KEY,
 			player_id INTEGER REFERENCES PLAYERS(id),
 			date DATE DEFAULT CURRENT_DATE,
 			text TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS STORY_NOTES (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('story_note_id_seq') PRIMARY KEY,
 			chronicle VARCHAR,
 			date DATE DEFAULT CURRENT_DATE,
 			text TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS MECHANICS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('mechanic_id_seq') PRIMARY KEY,
 			subject VARCHAR,
 			kind VARCHAR,
 			info TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS MERITS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('merit_id_seq') PRIMARY KEY,
 			name VARCHAR,
 			description TEXT,
 			kind VARCHAR
 		)`,
 		`CREATE TABLE IF NOT EXISTS MERITS_LEVELS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('merit_level_id_seq') PRIMARY KEY,
 			merit_id INTEGER REFERENCES MERITS(id),
 			level INTEGER,
 			description TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS ATTRIBUTES (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('attribute_id_seq') PRIMARY KEY,
 			name VARCHAR,
 			description TEXT,
 			kind VARCHAR
 		)`,
 		`CREATE TABLE IF NOT EXISTS ATTRIBUTES_LEVELS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('attribute_level_id_seq') PRIMARY KEY,
 			attribute_id INTEGER REFERENCES ATTRIBUTES(id),
 			level INTEGER,
 			description TEXT
 		)`,
 		`CREATE TABLE IF NOT EXISTS SKILLS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('skill_id_seq') PRIMARY KEY,
 			name VARCHAR,
 			description TEXT,
 			kind VARCHAR
 		)`,
 		`CREATE TABLE IF NOT EXISTS SKILLS_LEVELS (
-			id INTEGER PRIMARY KEY,
+			id INTEGER DEFAULT nextval('skill_level_id_seq') PRIMARY KEY,
 			skill_id INTEGER REFERENCES SKILLS(id),
 			level INTEGER,
 			description TEXT
@@ -165,29 +183,24 @@ func InsertIntoTable(conn *sql.DB, tableName string, columns []string, values []
 			query += ", "
 		}
 	}
-	query += ")"
-	log.Println(values)
-	stmt, _ := conn.Prepare(query)
-	defer stmt.Close()
-	sqlResult, err := stmt.Exec(values...)
+	query += ") RETURNING id;"
+	var insertedId int64
+	err := conn.QueryRow(query, values...).Scan(&insertedId)
 
 	if err != nil {
-		log.Fatalf("Failed to insert into %s: %v", tableName, err)
+		log.Fatalf("Failed to query insert statement for %s: %v", tableName, err)
 	}
 
-	returnedID, err := sqlResult.LastInsertId()
-	if err != nil {
-		log.Fatalf("Failed to retrieve last insert ID: %v", err)
-	}
-
-	log.Printf("Inserted into %s with ID: %d", tableName, returnedID)
-	return returnedID
+	log.Printf("Inserted into %s with ID: %d", tableName, insertedId)
+	return insertedId
 }
 
 func SelectById(conn *sql.DB, tableName string, id int64) map[string]interface{} {
 	query := "SELECT * FROM " + tableName + " WHERE id = ?"
 
 	rows, _ := conn.Query(query, id)
+	defer rows.Close()
+	log.Printf("Executing query: %s with ID: %d with rows %+v", query, id, rows)
 	results, _ := convertRowsToMap(rows)
 	if len(results) > 0 {
 		return results[0]
@@ -201,6 +214,7 @@ func convertRowsToMap(rows *sql.Rows) ([]map[string]interface{}, error) {
 		return nil, err
 	}
 
+	log.Printf("Converting rows to map with columns: %v", columns)
 	results := []map[string]interface{}{}
 
 	for rows.Next() {
