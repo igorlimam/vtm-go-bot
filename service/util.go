@@ -2,6 +2,7 @@ package service
 
 import (
 	"strconv"
+	"strings"
 	"vtm-go-bot/repository"
 
 	"github.com/bwmarrin/discordgo"
@@ -31,6 +32,14 @@ func ConvertStringToInt(levelStr string) int {
 		return -1
 	}
 	return level
+}
+
+func SplitModalInput(input string, separator string, expected int) []string {
+	arr := strings.Split(input, separator)
+	if len(arr) != expected {
+		return []string{}
+	}
+	return arr
 }
 
 func CheckDDLService() {

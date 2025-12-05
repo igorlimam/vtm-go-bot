@@ -49,8 +49,8 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
 							discordgo.TextInput{
-								CustomID: "power-name",
-								Label:    "Nome do Poder",
+								CustomID: "power-name-level-type",
+								Label:    "Nome|Nivel|Tipo (Ex: \"Fortitude|3|Fisico\")",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -69,7 +69,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 							discordgo.TextInput{
 								CustomID: "power-dice-pool",
 								Label:    "Parada de Dados",
-								Style:    discordgo.TextInputParagraph,
+								Style:    discordgo.TextInputShort,
 							},
 						},
 					},
@@ -77,17 +77,8 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 						Components: []discordgo.MessageComponent{
 
 							discordgo.TextInput{
-								CustomID: "power-cost",
-								Label:    "Custo do Poder",
-								Style:    discordgo.TextInputShort,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "power-duration",
-								Label:    "Duração do Poder",
+								CustomID: "power-cost-duration",
+								Label:    "Custo|Duração (Ex: \"Gratuito|Uma cena\")",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -98,24 +89,6 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-system",
 								Label:    "Sistema",
 								Style:    discordgo.TextInputParagraph,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "power-type",
-								Label:    "Tipo do Poder",
-								Style:    discordgo.TextInputShort,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "power-level",
-								Label:    "Nível do Poder (1-10)",
-								Style:    discordgo.TextInputShort,
 							},
 						},
 					},
