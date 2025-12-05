@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 	"vtm-go-bot/controller"
 	"vtm-go-bot/view"
 
@@ -28,12 +29,13 @@ func RegisterCommands(session *discordgo.Session) {
 	commands := map[string]string{
 		"ping":           "AM I ALIVE?",
 		"add-disciplina": "Adiciona uma nova disciplina",
+		"add-poder":      "Adiciona um novo poder a uma disciplina existente",
 	}
 
 	for name, description := range commands {
 		_, err := session.ApplicationCommandCreate(
 			session.State.User.ID,
-			"",
+			session.State.Guilds[0].ID,
 			&discordgo.ApplicationCommand{
 				Name:        name,
 				Description: description,
@@ -44,14 +46,25 @@ func RegisterCommands(session *discordgo.Session) {
 		}
 	}
 	log.Println("Commands registered successfully.")
+	controller.CheckDDLController()
 }
 
 func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 
 	if interaction.Type == discordgo.InteractionModalSubmit {
-		switch interaction.ModalSubmitData().CustomID {
+		switch strings.Split(interaction.ModalSubmitData().CustomID, "|")[0] {
 		case "add-discipline-modal":
 			controller.AddDiscipline(s, interaction)
+		case "add-power-modal":
+			controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+		}
+	}
+
+	if interaction.Type == discordgo.InteractionMessageComponent {
+		data := interaction.MessageComponentData()
+		switch data.CustomID {
+		case "select-discipline-for-power":
+			view.AddPowerView(s, interaction, data.Values[0])
 		}
 	}
 
@@ -73,6 +86,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-disciplina":
 		checkGuildOwner(s, interaction)
 		view.AddDisciplineView(s, interaction)
+	case "add-poder":
+		checkGuildOwner(s, interaction)
+		view.PowerSelectDisciplineView(s, interaction, controller.GetAllDisciplines())
 	}
 
 }

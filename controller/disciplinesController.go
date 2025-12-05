@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"vtm-go-bot/model"
 	"vtm-go-bot/service"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,4 +12,8 @@ func AddDiscipline(session *discordgo.Session, interaction *discordgo.Interactio
 	log.Println("AddDiscipline command invoked")
 	status := service.AddDisciplineService(interaction)["status"]
 	ResolveResponse(session, interaction, status)
+}
+
+func GetAllDisciplines() []model.Discipline {
+	return service.GetAllDisciplines()
 }

@@ -1,6 +1,11 @@
 package service
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"strconv"
+	"vtm-go-bot/repository"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 func ModalToMap(interaction *discordgo.InteractionCreate) map[string]interface{} {
 	dataModal := interaction.ModalSubmitData().Components
@@ -17,4 +22,17 @@ func ModalToMap(interaction *discordgo.InteractionCreate) map[string]interface{}
 	}
 
 	return values
+}
+
+func ConvertStringToInt(levelStr string) int {
+	level, err := strconv.Atoi(levelStr)
+	if err != nil {
+		// Not a number at all
+		return -1
+	}
+	return level
+}
+
+func CheckDDLService() {
+	repository.CheckDDL()
 }

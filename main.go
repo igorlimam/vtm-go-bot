@@ -28,8 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sess.AddHandler(RegisterHandlers)
-
 	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
 	err = sess.Open()
@@ -40,6 +38,7 @@ func main() {
 	defer sess.Close()
 
 	RegisterCommands(sess)
+	sess.AddHandler(RegisterHandlers)
 	fmt.Println("BOT IS ONLINE!!!")
 
 	sc := make(chan os.Signal, 1)

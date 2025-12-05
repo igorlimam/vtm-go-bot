@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"vtm-go-bot/service"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -19,4 +20,9 @@ func ResolveResponse(s *discordgo.Session, interaction *discordgo.InteractionCre
 	if err != nil {
 		log.Printf("Failed to respond to interaction: %v", err)
 	}
+}
+
+func CheckDDLController() {
+	service.CheckDDLService()
+	log.Println("Database schema checked and updated if necessary.")
 }
