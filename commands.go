@@ -30,6 +30,7 @@ func RegisterCommands(session *discordgo.Session) {
 		"ping":           "AM I ALIVE?",
 		"add-disciplina": "Adiciona uma nova disciplina",
 		"add-poder":      "Adiciona um novo poder a uma disciplina existente",
+		"add-clan":       "Adiciona um novo clã",
 	}
 
 	for name, description := range commands {
@@ -65,6 +66,8 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		switch data.CustomID {
 		case "select-discipline-for-power":
 			view.AddPowerView(s, interaction, data.Values[0])
+		case "select-disciplines-for-clan":
+			log.Printf("Selected disciplines for clan: %v", data.Values)
 		}
 	}
 
@@ -89,6 +92,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-poder":
 		checkGuildOwner(s, interaction)
 		view.PowerSelectDisciplineView(s, interaction, controller.GetAllDisciplines())
+	case "add-clan":
+		checkGuildOwner(s, interaction)
+		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines())
 	}
 
 }
