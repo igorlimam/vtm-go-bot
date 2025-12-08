@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"vtm-go-bot/model"
 
 	"gorm.io/driver/sqlite"
@@ -23,15 +24,26 @@ func CheckDDL() {
 	}
 	DB.AutoMigrate(&model.Discipline{})
 	DB.AutoMigrate(&model.Power{})
+	DB.AutoMigrate(&model.Clan{})
 }
 
 func InsertIntoTable(tableInstance interface{}) {
-	DB.Create(tableInstance)
+	err := DB.Create(tableInstance)
+	if err.Error != nil {
+		log.Fatalf("Error inserting into table: %v", err.Error)
+	}
 }
 
-/*
-func getById(tableInstance interface{}, id uint) {
-	db := ConnectGormSqlite()
-	db.First(tableInstance, id)
+func GetAll(tableInstance interface{}) {
+	err := DB.Find(tableInstance)
+	if err.Error != nil {
+		log.Fatalf("Error retrieving all records: %v", err.Error)
+	}
 }
-*/
+
+func GetByID(tableInstance interface{}, id uint) {
+	err := DB.First(tableInstance, id)
+	if err.Error != nil {
+		log.Fatalf("Error retrieving record by ID: %v", err.Error)
+	}
+}

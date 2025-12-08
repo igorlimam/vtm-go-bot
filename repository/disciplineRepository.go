@@ -20,12 +20,12 @@ func AddDiscipline(name string, dtype string, resonance string, threat string, d
 
 func GetAllDisciplines() []model.Discipline {
 	var disciplines []model.Discipline
-	DB.Find(&disciplines)
+	GetAll(&disciplines)
 	return disciplines
 }
 
-func getDisciplineById(id uint) model.Discipline {
+func GetDisciplineById(id uint) model.Discipline {
 	var discipline model.Discipline
-	DB.First(&discipline, id)
+	GetByID(&discipline, id)
 	return discipline
 }

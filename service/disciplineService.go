@@ -22,6 +22,11 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate) map[string]s
 	return status
 }
 
+func GetDisciplineByID(id uint) model.Discipline {
+	discipline := repository.GetDisciplineById(id)
+	return discipline
+}
+
 func GetAllDisciplines() []model.Discipline {
 	disciplines := repository.GetAllDisciplines()
 	return disciplines

@@ -58,6 +58,8 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			controller.AddDiscipline(s, interaction)
 		case "add-power-modal":
 			controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+		case "add-clan-modal":
+			controller.AddClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
 		}
 	}
 
@@ -67,6 +69,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		case "select-discipline-for-power":
 			view.AddPowerView(s, interaction, data.Values[0])
 		case "select-disciplines-for-clan":
+			view.AddClanView(s, interaction, data.Values)
 			log.Printf("Selected disciplines for clan: %v", data.Values)
 		}
 	}
