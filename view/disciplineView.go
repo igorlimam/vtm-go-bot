@@ -1,6 +1,8 @@
 package view
 
 import (
+	"fmt"
+	"log"
 	"vtm-go-bot/model"
 
 	"github.com/bwmarrin/discordgo"
@@ -68,13 +70,24 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 }
 
 func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline) {
-	data := interaction.ApplicationCommandData()
 
-	var focused *dicordgo.ApplicationCommandInteractionDataOption
-	for _, option := range data.Options {
-		if option.Focused {
-			focused = option
-			break
-		}
+	var choices []*discordgo.ApplicationCommandOptionChoice
+	for _, discipline := range disciplines {
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  discipline.Name,
+			Value: fmt.Sprintf("%d", discipline.ID),
+		})
 	}
+
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to autocomplete interaction:", err)
+	}
+
 }
