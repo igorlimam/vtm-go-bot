@@ -46,6 +46,53 @@ func RegisterCommands(session *discordgo.Session) {
 			log.Fatalf("Cannot create '%v' command: %v", name, err)
 		}
 	}
+
+	autoCompleteCommands := map[string]string{
+		"disciplina": "Fornece informações sobre uma disciplina específica",
+	}
+
+	for name, description := range autoCompleteCommands {
+		type Option struct {
+			Name  string
+			Value string
+		}
+
+		var optionsLoader []Option
+
+		switch name {
+		case "disciplina":
+			for _, option := range controller.GetAllDisciplines() {
+				optionsLoader = append(optionsLoader, Option{
+					Name:  option.Name,
+					Value: string(rune(option.ID)),
+				})
+			}
+		}
+
+		var choices []*discordgo.ApplicationCommandOptionChoice
+		for _, option := range optionsLoader {
+			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+				Name:  option.Name,
+				Value: option.Value,
+			})
+		}
+
+		_, err := session.ApplicationCommandCreate(
+			session.State.User.ID,
+			session.State.Guilds[0].ID,
+			&discordgo.ApplicationCommand{
+				Name:        name,
+				Description: description,
+				Options: []*discordgo.ApplicationCommandOption{
+					optionsLoader[name].Loader(),
+				},
+			},
+		)
+		if err != nil {
+			log.Fatalf("Cannot create '%v' command: %v", name, err)
+		}
+	}
+
 	log.Println("Commands registered successfully.")
 	controller.CheckDDLController()
 }
@@ -98,6 +145,8 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-clan":
 		checkGuildOwner(s, interaction)
 		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines())
+	case "disciplina":
+		view.DisciplinaInfoView(s, interaction, controller.GetAllDisciplines())
 	}
 
 }

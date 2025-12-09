@@ -1,6 +1,10 @@
 package view
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"vtm-go-bot/model"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 	s.InteractionRespond(
@@ -61,4 +65,16 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 			},
 		},
 	)
+}
+
+func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline) {
+	data := interaction.ApplicationCommandData()
+
+	var focused *dicordgo.ApplicationCommandInteractionDataOption
+	for _, option := range data.Options {
+		if option.Focused {
+			focused = option
+			break
+		}
+	}
 }
