@@ -99,29 +99,32 @@ func RegisterCommands(session *discordgo.Session) {
 func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 
 	if interaction.Type == discordgo.InteractionModalSubmit {
-		log.Printf("CUSTOM ID: %s", strings.Split(interaction.ModalSubmitData().CustomID, "|")[0])
-		switch strings.Split(interaction.ModalSubmitData().CustomID, "|")[0] {
+		customID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[0]
+		customData := strings.Split(interaction.ModalSubmitData().CustomID, "|")[1]
+		log.Printf("CUSTOM ID: %s", customID)
+		switch customID {
 		case "add-discipline-modal":
 			status := controller.AddDiscipline(s, interaction)
 			view.ResolveResponse(s, interaction, status)
 		case "update-discipline-modal":
-			status := controller.UpdateDiscipline(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.UpdateDiscipline(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		case "add-power-modal":
-			status := controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.AddPower(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		case "add-clan-modal":
-			status := controller.AddClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.AddClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		case "update-clan-modal":
-			status := controller.UpdateClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.UpdateClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
 	if interaction.Type == discordgo.InteractionMessageComponent {
 		data := interaction.MessageComponentData()
-		switch strings.Split(interaction.MessageComponentData().CustomID, "|")[0] {
+		customID := strings.Split(data.CustomID, "|")[0]
+		switch customID {
 		case "select-discipline-for-power":
 			view.AddPowerView(s, interaction, data.Values[0])
 		case "select-disciplines-for-clan":
