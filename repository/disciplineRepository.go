@@ -18,6 +18,20 @@ func AddDiscipline(name string, dtype string, resonance string, threat string, d
 	return map[string]string{"status": "Disciplina adicionada com sucesso!"}
 }
 
+func UpdateDiscipline(id uint, name string, dtype string, resonance string, threat string, description string) map[string]string {
+	disciplineToBeUpdated := model.Discipline{
+		ID:          id,
+		Name:        name,
+		Dtype:       dtype,
+		Resonance:   resonance,
+		Threat:      threat,
+		Description: description,
+	}
+	UpdateTable(&disciplineToBeUpdated)
+	log.Printf("Updated Discipline ID %d: %s\n", id, name)
+	return map[string]string{"status": "Disciplina atualizada com sucesso!"}
+}
+
 func GetAllDisciplines() []model.Discipline {
 	var disciplines []model.Discipline
 	GetAll(&disciplines)

@@ -53,7 +53,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 						Components: []discordgo.MessageComponent{
 							discordgo.TextInput{
 								CustomID: "power-name-level-type",
-								Label:    "Nome|Nivel|Tipo (Ex: \"Fortitude|3|Fisico\")",
+								Label:    "Nome|Nivel|Tipo - \"Fata Morgana|1|Mental\"",
 								Style:    discordgo.TextInputShort,
 							},
 						},

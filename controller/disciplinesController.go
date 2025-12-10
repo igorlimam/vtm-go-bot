@@ -10,7 +10,13 @@ import (
 
 func AddDiscipline(session *discordgo.Session, interaction *discordgo.InteractionCreate) string {
 	log.Println("AddDiscipline command invoked")
-	status := service.AddDisciplineService(interaction)["status"]
+	status := service.AddDisciplineService(interaction, "")["status"]
+	return status
+}
+
+func UpdateDiscipline(session *discordgo.Session, interaction *discordgo.InteractionCreate, id string) string {
+	log.Println("UpdateDiscipline command invoked")
+	status := service.AddDisciplineService(interaction, id)["status"]
 	return status
 }
 

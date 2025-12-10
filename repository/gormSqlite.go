@@ -54,3 +54,10 @@ func GetByField(tableInstance interface{}, fieldName string, value interface{}) 
 		log.Fatalf("Error retrieving records by field %s: %v", fieldName, err.Error)
 	}
 }
+
+func UpdateTable(tableInstance interface{}) {
+	err := DB.Save(tableInstance)
+	if err.Error != nil {
+		log.Fatalf("Error updating record: %v", err.Error)
+	}
+}

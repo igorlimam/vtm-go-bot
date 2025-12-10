@@ -9,17 +9,39 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddDisciplineService(interaction *discordgo.InteractionCreate) map[string]string {
+func AddDisciplineService(interaction *discordgo.InteractionCreate, idStr string) map[string]string {
 	dataModal := ModalToMap(interaction)
-	status := repository.AddDiscipline(
-		dataModal["discipline-name"].(string),
-		dataModal["discipline-type"].(string),
-		dataModal["discipline-resonance"].(string),
-		dataModal["discipline-threat"].(string),
-		dataModal["discipline-description"].(string),
-	)
 
-	log.Printf("Inserted Discipline: %s\n", dataModal["discipline-name"].(string))
+	var status map[string]string
+
+	if idStr != "" {
+		// If idStr is provided, we are updating an existing discipline
+		id, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return map[string]string{"status": "DISCIPLINA NÃO ATUALIZADA! ID inválido."}
+		}
+		status = repository.UpdateDiscipline(
+			uint(id),
+			dataModal["discipline-name"].(string),
+			dataModal["discipline-type"].(string),
+			dataModal["discipline-resonance"].(string),
+			dataModal["discipline-threat"].(string),
+			dataModal["discipline-description"].(string),
+		)
+
+		log.Printf("Updated Discipline ID %d: %s\n", id, dataModal["discipline-name"].(string))
+	} else {
+		status = repository.AddDiscipline(
+			dataModal["discipline-name"].(string),
+			dataModal["discipline-type"].(string),
+			dataModal["discipline-resonance"].(string),
+			dataModal["discipline-threat"].(string),
+			dataModal["discipline-description"].(string),
+		)
+
+		log.Printf("Inserted Discipline: %s\n", dataModal["discipline-name"].(string))
+	}
+
 	return status
 }
 

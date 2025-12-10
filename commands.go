@@ -58,6 +58,9 @@ func RegisterCommands(session *discordgo.Session) {
 			{"name": "disciplina", "description": "Disciplina do poder"},
 			{"name": "poder", "description": "Fornece informações sobre um poder específico"},
 		},
+		"update-disciplina": {
+			{"name": "disciplina", "description": "Disciplina a ser atualizada"},
+		},
 	}
 
 	for command, commandMap := range readCommands {
@@ -95,6 +98,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		switch strings.Split(interaction.ModalSubmitData().CustomID, "|")[0] {
 		case "add-discipline-modal":
 			status := controller.AddDiscipline(s, interaction)
+			view.ResolveResponse(s, interaction, status)
+		case "update-discipline-modal":
+			status := controller.UpdateDiscipline(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
 			view.ResolveResponse(s, interaction, status)
 		case "add-power-modal":
 			status := controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
@@ -163,7 +169,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		)
 	case "add-disciplina":
 		checkGuildOwner(s, interaction)
-		view.AddDisciplineView(s, interaction)
+		view.AddDisciplineView(s, interaction, nil)
 	case "add-poder":
 		checkGuildOwner(s, interaction)
 		view.PowerSelectDisciplineView(s, interaction, controller.GetAllDisciplines())
@@ -180,6 +186,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "poder":
 		power := controller.GetPowerById(interaction.ApplicationCommandData().Options[1].StringValue())
 		view.ShowPowerInfoView(s, interaction, power)
+	case "update-disciplina":
+		checkGuildOwner(s, interaction)
+		discipline := controller.GetDisciplineByID(interaction.ApplicationCommandData().Options[0].StringValue())
+		view.AddDisciplineView(s, interaction, &discipline)
 	}
 
 }
