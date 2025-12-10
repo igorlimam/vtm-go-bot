@@ -2,6 +2,7 @@ package service
 
 import (
 	"strconv"
+	"vtm-go-bot/model"
 	"vtm-go-bot/repository"
 
 	"github.com/bwmarrin/discordgo"
@@ -39,4 +40,26 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 	)
 
 	return status
+}
+
+func GetAllPowers() []model.Power {
+	return repository.GetAllPowers()
+}
+
+func GetDisciplinePowersByID(disciplineID string) []model.Power {
+	id, err := strconv.ParseUint(disciplineID, 10, 64)
+	if err != nil {
+		return []model.Power{}
+	}
+	power := repository.GetPowersByDiciplineId(uint(id))
+	return power
+}
+
+func GetPowerById(powerID string) model.Power {
+	id, err := strconv.ParseUint(powerID, 10, 64)
+	if err != nil {
+		return model.Power{}
+	}
+	power := repository.GetPowerById(uint(id))
+	return power
 }

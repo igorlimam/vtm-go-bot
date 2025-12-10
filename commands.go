@@ -47,30 +47,41 @@ func RegisterCommands(session *discordgo.Session) {
 		}
 	}
 
-	readCommands := map[string]string{
-		"disciplina": "Fornece informações sobre uma disciplina específica",
-		"clan":       "Fornece informações sobre um clã específico",
+	readCommands := map[string][]map[string]string{
+		"disciplina": {
+			{"name": "disciplina", "description": "Fornece informações sobre uma disciplina específica"},
+		},
+		"clan": {
+			{"name": "clan", "description": "Fornece informações sobre um clã específico"},
+		},
+		"poder": {
+			{"name": "disciplina", "description": "Disciplina do poder"},
+			{"name": "poder", "description": "Fornece informações sobre um poder específico"},
+		},
 	}
-	for name, description := range readCommands {
+
+	for command, commandMap := range readCommands {
+		var option []*discordgo.ApplicationCommandOption
+		for _, params := range commandMap {
+			option = append(option, &discordgo.ApplicationCommandOption{
+				Type:         discordgo.ApplicationCommandOptionString,
+				Name:         params["name"],
+				Description:  params["description"],
+				Required:     true,
+				Autocomplete: true,
+			})
+		}
 		_, err := session.ApplicationCommandCreate(
 			session.State.User.ID,
 			session.State.Guilds[0].ID,
 			&discordgo.ApplicationCommand{
-				Name:        name,
-				Description: description,
-				Options: []*discordgo.ApplicationCommandOption{
-					{
-						Type:         discordgo.ApplicationCommandOptionString,
-						Name:         name,
-						Description:  description,
-						Required:     true,
-						Autocomplete: true,
-					},
-				},
+				Name:        command,
+				Description: "Mostrar informações sobre " + command,
+				Options:     option,
 			},
 		)
 		if err != nil {
-			log.Fatalf("Cannot create '%v' command: %v", name, err)
+			log.Fatalf("Cannot create '%v' command: %v", command, err)
 		}
 	}
 
@@ -108,11 +119,28 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	if interaction.Type == discordgo.InteractionApplicationCommandAutocomplete {
 		for _, opt := range interaction.ApplicationCommandData().Options {
 			if opt.Focused && opt.Name == "disciplina" {
+				log.Printf("Focused option for disciplina: %s", opt.StringValue())
 				view.DisciplinaInfoView(s, interaction, controller.GetAllDisciplines())
 				return
 			}
 			if opt.Focused && opt.Name == "clan" {
 				view.ClanInfoView(s, interaction, controller.GetAllClans())
+				return
+			}
+			if opt.Focused && opt.Name == "poder" {
+				var query string
+				var disciplineID string
+				for _, option := range interaction.ApplicationCommandData().Options {
+					if option.Name == "disciplina" {
+						disciplineID = option.StringValue()
+					}
+					if option.Focused {
+						query = strings.ToLower(option.StringValue())
+					}
+				}
+				log.Printf("Autocomplete query for power: %s", disciplineID)
+				disciplinePowers := controller.GetDisciplinePowersByID(disciplineID)
+				view.PowerInfoView(s, interaction, query, disciplinePowers)
 				return
 			}
 		}
@@ -149,6 +177,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
 		disciplines := controller.GetClanDisciplinesById(clanID)
 		view.ShowClanInfoView(s, interaction, controller.GetClanByID(clanID), disciplines)
+	case "poder":
+		power := controller.GetPowerById(interaction.ApplicationCommandData().Options[1].StringValue())
+		view.ShowPowerInfoView(s, interaction, power)
 	}
 
 }

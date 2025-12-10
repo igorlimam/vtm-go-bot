@@ -2,6 +2,9 @@ package view
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
 	"vtm-go-bot/model"
 
 	"github.com/bwmarrin/discordgo"
@@ -78,7 +81,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 
 							discordgo.TextInput{
 								CustomID: "power-cost-duration-amalgam",
-								Label:    "Custo|Duração|Amalgama (Ex: \"Gratuito|Uma cena|Ofuscação 2\")",
+								Label:    "Custo|Duração|Amalgama",
 								Style:    discordgo.TextInputShort,
 							},
 						},
@@ -99,4 +102,77 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 	if err != nil {
 		fmt.Println("Error responding with modal:", err)
 	}
+}
+
+func PowerInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, query string, powers []model.Power) {
+
+	choices := []*discordgo.ApplicationCommandOptionChoice{}
+	for _, power := range powers {
+		if strings.Contains(strings.ToLower(power.Name), query) && (len(choices) < 25) {
+			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+				Name:  power.Name,
+				Value: fmt.Sprintf("%d", power.ID),
+			})
+		}
+	}
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to autocomplete POWER interaction:", err)
+	}
+}
+
+func ShowPowerInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, power model.Power) {
+	embed := &discordgo.MessageEmbed{
+		Title:       power.Name,
+		Description: power.Description,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Parada de dados",
+				Value:  power.DicePool,
+				Inline: true,
+			},
+			{
+				Name:   "Custo",
+				Value:  power.Cost,
+				Inline: true,
+			},
+			{
+				Name:   "Duração",
+				Value:  power.Duration,
+				Inline: false,
+			},
+			{
+				Name:   "Tipo",
+				Value:  power.Kind,
+				Inline: true,
+			},
+			{
+				Name:   "Amalgama",
+				Value:  power.Amalgam,
+				Inline: true,
+			},
+			{
+				Name:   "Nivel",
+				Value:  strconv.Itoa(power.Level),
+				Inline: true,
+			},
+			{
+				Name:   "Sistema",
+				Value:  power.System,
+				Inline: false,
+			},
+		},
+	}
+	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
 }

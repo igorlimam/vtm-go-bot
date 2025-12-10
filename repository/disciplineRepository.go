@@ -29,3 +29,9 @@ func GetDisciplineById(id uint) model.Discipline {
 	GetByID(&discipline, id)
 	return discipline
 }
+
+func GetDisciplineByName(name string) model.Discipline {
+	var disciplines []model.Discipline
+	GetByField(&disciplines, "name", name)
+	return disciplines[0]
+}
