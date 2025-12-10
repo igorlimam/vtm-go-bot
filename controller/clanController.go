@@ -8,7 +8,8 @@ import (
 )
 
 func AddClan(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDsSuffix string) string {
-	status := service.AddClanService(interaction, disciplineIDsSuffix)["status"]
+	isUpdate := false
+	status := service.AddClanService(interaction, disciplineIDsSuffix, isUpdate)["status"]
 	return status
 }
 
@@ -18,4 +19,10 @@ func GetAllClans() []model.Clan {
 
 func GetClanByID(idStr string) model.Clan {
 	return service.GetClanByIDService(idStr)
+}
+
+func UpdateClan(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDsSuffix string) string {
+	isUpdate := true
+	status := service.AddClanService(interaction, disciplineIDsSuffix, isUpdate)["status"]
+	return status
 }

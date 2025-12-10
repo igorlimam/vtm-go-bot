@@ -10,26 +10,44 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddClanService(interaction *discordgo.InteractionCreate, disciplineIDsSuffix string) map[string]string {
-
+func AddClanService(interaction *discordgo.InteractionCreate, disciplineIDsSuffix string, isUpdate bool) map[string]string {
 	dataModal := ModalToMap(interaction)
 	disciplinesSplited := strings.Split(disciplineIDsSuffix, "-")
+	var clanId uint64
 	var disciplinesVector []model.Discipline
 
-	for _, idStr := range disciplinesSplited {
+	for i, idStr := range disciplinesSplited {
 		id, _ := strconv.Atoi(idStr)
-		disciplinesVector = append(disciplinesVector, repository.GetDisciplineById(uint(id)))
+		if i == 0 && isUpdate {
+			clanId = uint64(id)
+		} else {
+			disciplinesVector = append(disciplinesVector, repository.GetDisciplineById(uint(id)))
+		}
 	}
 
-	repository.AddClan(
-		dataModal["clan-name"].(string),
-		dataModal["clan-description"].(string),
-		dataModal["clan-bane"].(string),
-		dataModal["clan-compulsion"].(string),
-		disciplinesVector,
-	)
+	var status map[string]string
+	if isUpdate {
+		status = repository.UpdateClan(
+			uint(clanId),
+			dataModal["clan-name"].(string),
+			dataModal["clan-description"].(string),
+			dataModal["clan-bane"].(string),
+			dataModal["clan-compulsion"].(string),
+			disciplinesVector,
+		)
 
-	return map[string]string{"status": "Clan added successfully"}
+		log.Printf("Updated Clan ID %d: %s\n", clanId, dataModal["clan-name"].(string))
+	} else {
+		status = repository.AddClan(
+			dataModal["clan-name"].(string),
+			dataModal["clan-description"].(string),
+			dataModal["clan-bane"].(string),
+			dataModal["clan-compulsion"].(string),
+			disciplinesVector,
+		)
+	}
+
+	return status
 }
 
 func GetAllClansService() []model.Clan {

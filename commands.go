@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 	"vtm-go-bot/controller"
+	"vtm-go-bot/model"
 	"vtm-go-bot/view"
 
 	"github.com/bwmarrin/discordgo"
@@ -61,6 +62,9 @@ func RegisterCommands(session *discordgo.Session) {
 		"update-disciplina": {
 			{"name": "disciplina", "description": "Disciplina a ser atualizada"},
 		},
+		"update-clan": {
+			{"name": "clan", "description": "Clã a ser atualizado"},
+		},
 	}
 
 	for command, commandMap := range readCommands {
@@ -95,6 +99,7 @@ func RegisterCommands(session *discordgo.Session) {
 func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 
 	if interaction.Type == discordgo.InteractionModalSubmit {
+		log.Printf("CUSTOM ID: %s", strings.Split(interaction.ModalSubmitData().CustomID, "|")[0])
 		switch strings.Split(interaction.ModalSubmitData().CustomID, "|")[0] {
 		case "add-discipline-modal":
 			status := controller.AddDiscipline(s, interaction)
@@ -108,16 +113,24 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		case "add-clan-modal":
 			status := controller.AddClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
 			view.ResolveResponse(s, interaction, status)
+		case "update-clan-modal":
+			status := controller.UpdateClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
 	if interaction.Type == discordgo.InteractionMessageComponent {
 		data := interaction.MessageComponentData()
-		switch data.CustomID {
+		switch strings.Split(interaction.MessageComponentData().CustomID, "|")[0] {
 		case "select-discipline-for-power":
 			view.AddPowerView(s, interaction, data.Values[0])
 		case "select-disciplines-for-clan":
-			view.AddClanView(s, interaction, data.Values)
+			clanID := strings.Split(data.CustomID, "|")[1]
+			var clan model.Clan
+			if clanID != "" {
+				clan = controller.GetClanByID(clanID)
+			}
+			view.AddClanView(s, interaction, data.Values, &clan)
 			log.Printf("Selected disciplines for clan: %v", data.Values)
 		}
 	}
@@ -175,7 +188,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		view.PowerSelectDisciplineView(s, interaction, controller.GetAllDisciplines())
 	case "add-clan":
 		checkGuildOwner(s, interaction)
-		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines())
+		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines(), nil, "")
 	case "disciplina":
 		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))
@@ -190,6 +203,12 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		checkGuildOwner(s, interaction)
 		discipline := controller.GetDisciplineByID(interaction.ApplicationCommandData().Options[0].StringValue())
 		view.AddDisciplineView(s, interaction, &discipline)
+	case "update-clan":
+		checkGuildOwner(s, interaction)
+		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		selectedDisciplines := controller.GetClanDisciplinesById(clanID)
+		disciplines := controller.GetAllDisciplines()
+		view.StringSelectClanDisciplines(s, interaction, disciplines, selectedDisciplines, clanID)
 	}
 
 }

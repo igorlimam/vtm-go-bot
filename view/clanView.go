@@ -3,26 +3,38 @@ package view
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"vtm-go-bot/model"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline) {
-	choices := make([]discordgo.SelectMenuOption, 0)
-	for _, discipline := range disciplines {
-		choices = append(choices, discordgo.SelectMenuOption{
-			Label: discipline.Name,
-			Value: fmt.Sprintf("%d", discipline.ID),
-		})
+func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline, selectedDisciplines []model.Discipline, clanID string) {
+	var choices []discordgo.SelectMenuOption
+	if selectedDisciplines != nil {
+		for _, discipline := range disciplines {
+			isSelected := slices.ContainsFunc(selectedDisciplines, func(d model.Discipline) bool { return d.ID == discipline.ID })
+			choices = append(choices, discordgo.SelectMenuOption{
+				Label:   discipline.Name,
+				Value:   fmt.Sprintf("%d", discipline.ID),
+				Default: isSelected,
+			})
+		}
+	} else {
+		for _, discipline := range disciplines {
+			choices = append(choices, discordgo.SelectMenuOption{
+				Label: discipline.Name,
+				Value: fmt.Sprintf("%d", discipline.ID),
+			})
+		}
 	}
 
 	min := 1
 	selectMenu := discordgo.ActionsRow{
 		Components: []discordgo.MessageComponent{
 			&discordgo.SelectMenu{
-				CustomID:    "select-disciplines-for-clan",
+				CustomID:    "select-disciplines-for-clan|" + clanID,
 				Placeholder: "Selecione pelo menos uma disciplinas",
 				MinValues:   &min,
 				MaxValues:   len(choices),
@@ -46,17 +58,32 @@ func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.In
 	}
 }
 
-func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDs []string) {
-
+func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDs []string, clan *model.Clan) {
 	suffix := strings.Join(disciplineIDs, "-")
+
+	customID := "add-clan-modal|" + suffix
+	title := "Adicionar Novo Clã"
+	name := ""
+	description := ""
+	bane := ""
+	compulsion := ""
+
+	if clan != nil {
+		customID = "update-clan-modal|" + fmt.Sprintf("%d", clan.ID) + "-" + suffix
+		title = "Atualizar Clã"
+		name = clan.Name
+		description = clan.Description
+		bane = clan.Bane
+		compulsion = clan.Compulsion
+	}
 
 	err := s.InteractionRespond(
 		interaction.Interaction,
 		&discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseModal,
 			Data: &discordgo.InteractionResponseData{
-				CustomID: "add-clan-modal|" + suffix,
-				Title:    "Adicionar Novo Clã",
+				CustomID: customID,
+				Title:    title,
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
@@ -64,6 +91,7 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 								CustomID: "clan-name",
 								Label:    "Nome do Clã",
 								Style:    discordgo.TextInputShort,
+								Value:    name,
 							},
 						},
 					},
@@ -73,6 +101,7 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 								CustomID: "clan-description",
 								Label:    "Descrição do Clã",
 								Style:    discordgo.TextInputParagraph,
+								Value:    description,
 							},
 						},
 					},
@@ -82,6 +111,7 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 								CustomID: "clan-bane",
 								Label:    "Fraqueza do Clã",
 								Style:    discordgo.TextInputParagraph,
+								Value:    bane,
 							},
 						},
 					},
@@ -91,6 +121,7 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 								CustomID: "clan-compulsion",
 								Label:    "Compulsão do Clã",
 								Style:    discordgo.TextInputParagraph,
+								Value:    compulsion,
 							},
 						},
 					},

@@ -14,6 +14,23 @@ func AddClan(clanName string, description string, bane string, compulsion string
 	return map[string]string{"status": "Clan added successfully"}
 }
 
+func UpdateClan(id uint, clanName string, description string, bane string, compulsion string, desciplines []model.Discipline) map[string]string {
+	clan := model.Clan{
+		ID:          id,
+		Name:        clanName,
+		Description: description,
+		Bane:        bane,
+		Compulsion:  compulsion,
+		Disciplines: desciplines,
+	}
+	UpdateTable(&clan)
+	DB.Model(&clan).Association("Disciplines").Clear()
+	if len(desciplines) > 0 {
+		DB.Model(&clan).Association("Disciplines").Append(desciplines)
+	}
+	return map[string]string{"status": "Clan updated successfully"}
+}
+
 func GetAllClans() []model.Clan {
 	var clans []model.Clan
 	GetAll(&clans)
