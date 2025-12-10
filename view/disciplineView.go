@@ -93,5 +93,31 @@ func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.Interaction
 }
 
 func ShowDisciplineInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline model.Discipline) {
-
+	embed := &discordgo.MessageEmbed{
+		Title:       discipline.Name,
+		Description: discipline.Description,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Tipo",
+				Value:  discipline.Dtype,
+				Inline: true,
+			},
+			{
+				Name:   "Ressonância",
+				Value:  discipline.Resonance,
+				Inline: true,
+			},
+			{
+				Name:   "Ameaça",
+				Value:  discipline.Threat,
+				Inline: false,
+			},
+		},
+	}
+	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
 }
