@@ -13,3 +13,15 @@ func AddClan(clanName string, description string, bane string, compulsion string
 	InsertIntoTable(&clan)
 	return map[string]string{"status": "Clan added successfully"}
 }
+
+func GetAllClans() []model.Clan {
+	var clans []model.Clan
+	GetAll(&clans)
+	return clans
+}
+
+func GetClanByID(id uint) model.Clan {
+	var clan model.Clan
+	GetByID(&clan, id)
+	return clan
+}

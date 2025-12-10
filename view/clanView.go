@@ -103,3 +103,60 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 		log.Println("Error responding to interaction:", err)
 	}
 }
+
+func ClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, clans []model.Clan) {
+	var choices []*discordgo.ApplicationCommandOptionChoice
+	for _, clan := range clans {
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  clan.Name,
+			Value: fmt.Sprintf("%d", clan.ID),
+		})
+	}
+
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to autocomplete interaction:", err)
+	}
+}
+
+func ShowClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, clan model.Clan, disciplines []model.Discipline) {
+
+	disciplinesList := ""
+	for _, discipline := range disciplines {
+		disciplinesList += fmt.Sprintf("- %s\n", discipline.Name)
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Title:       clan.Name,
+		Description: clan.Description,
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:   "Fraqueza",
+				Value:  clan.Bane,
+				Inline: false,
+			},
+			{
+				Name:   "Compulsão",
+				Value:  clan.Compulsion,
+				Inline: false,
+			},
+			{
+				Name:   "Disciplinas",
+				Value:  disciplinesList,
+				Inline: true,
+			},
+		},
+	}
+	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
+}

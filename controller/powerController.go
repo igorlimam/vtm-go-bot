@@ -7,8 +7,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddPower(session *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineId string) {
+func AddPower(session *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineId string) string {
 	log.Println("AddPower command invoked")
 	status := service.AddPowerService(interaction, disciplineId)["status"]
-	ResolveResponse(session, interaction, status)
+	return status
 }

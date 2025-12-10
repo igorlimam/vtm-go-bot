@@ -47,3 +47,10 @@ func GetByID(tableInstance interface{}, id uint) {
 		log.Fatalf("Error retrieving record by ID: %v", err.Error)
 	}
 }
+
+func GetByField(tableInstance interface{}, fieldName string, value interface{}) {
+	err := DB.Where(fieldName+" = ?", value).Find(tableInstance)
+	if err.Error != nil {
+		log.Fatalf("Error retrieving records by field %s: %v", fieldName, err.Error)
+	}
+}

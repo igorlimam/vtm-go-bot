@@ -49,6 +49,7 @@ func RegisterCommands(session *discordgo.Session) {
 
 	readCommands := map[string]string{
 		"disciplina": "Fornece informações sobre uma disciplina específica",
+		"clan":       "Fornece informações sobre um clã específico",
 	}
 	for name, description := range readCommands {
 		_, err := session.ApplicationCommandCreate(
@@ -82,11 +83,14 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	if interaction.Type == discordgo.InteractionModalSubmit {
 		switch strings.Split(interaction.ModalSubmitData().CustomID, "|")[0] {
 		case "add-discipline-modal":
-			controller.AddDiscipline(s, interaction)
+			status := controller.AddDiscipline(s, interaction)
+			view.ResolveResponse(s, interaction, status)
 		case "add-power-modal":
-			controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.AddPower(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			view.ResolveResponse(s, interaction, status)
 		case "add-clan-modal":
-			controller.AddClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			status := controller.AddClan(s, interaction, strings.Split(interaction.ModalSubmitData().CustomID, "|")[1])
+			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
@@ -105,6 +109,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		for _, opt := range interaction.ApplicationCommandData().Options {
 			if opt.Focused && opt.Name == "disciplina" {
 				view.DisciplinaInfoView(s, interaction, controller.GetAllDisciplines())
+				return
+			}
+			if opt.Focused && opt.Name == "clan" {
+				view.ClanInfoView(s, interaction, controller.GetAllClans())
 				return
 			}
 		}
@@ -137,6 +145,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "disciplina":
 		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))
+	case "clan":
+		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		disciplines := controller.GetClanDisciplinesById(clanID)
+		view.ShowClanInfoView(s, interaction, controller.GetClanByID(clanID), disciplines)
 	}
 
 }

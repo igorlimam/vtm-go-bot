@@ -1,6 +1,7 @@
 package service
 
 import (
+	"log"
 	"strconv"
 	"strings"
 	"vtm-go-bot/model"
@@ -29,4 +30,19 @@ func AddClanService(interaction *discordgo.InteractionCreate, disciplineIDsSuffi
 	)
 
 	return map[string]string{"status": "Clan added successfully"}
+}
+
+func GetAllClansService() []model.Clan {
+	clans := repository.GetAllClans()
+	return clans
+}
+
+func GetClanByIDService(idStr string) model.Clan {
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Printf("Failed to parse id '%s': %v", idStr, err)
+		return model.Clan{}
+	}
+	clan := repository.GetClanByID(uint(id))
+	return clan
 }

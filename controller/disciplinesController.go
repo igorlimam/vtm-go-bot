@@ -8,10 +8,10 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddDiscipline(session *discordgo.Session, interaction *discordgo.InteractionCreate) {
+func AddDiscipline(session *discordgo.Session, interaction *discordgo.InteractionCreate) string {
 	log.Println("AddDiscipline command invoked")
 	status := service.AddDisciplineService(interaction)["status"]
-	ResolveResponse(session, interaction, status)
+	return status
 }
 
 func GetAllDisciplines() []model.Discipline {
