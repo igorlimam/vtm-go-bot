@@ -12,5 +12,6 @@ type Power struct {
 	Duration    string
 	System      string
 	Kind        string
+	Amalgam     string `gorm:"default:-"`
 	Level       int
 }

@@ -77,8 +77,8 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 						Components: []discordgo.MessageComponent{
 
 							discordgo.TextInput{
-								CustomID: "power-cost-duration",
-								Label:    "Custo|Duração (Ex: \"Gratuito|Uma cena\")",
+								CustomID: "power-cost-duration-amalgam",
+								Label:    "Custo|Duração|Amalgama (Ex: \"Gratuito|Uma cena|Ofuscação 2\")",
 								Style:    discordgo.TextInputShort,
 							},
 						},

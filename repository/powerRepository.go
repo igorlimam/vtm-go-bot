@@ -4,7 +4,7 @@ import "vtm-go-bot/model"
 
 func AddPower(disciplineId uint, name string, description string,
 	dicePool string, cost string, duration string, system string,
-	ptype string, level int) map[string]string {
+	ptype string, amalgam string, level int) map[string]string {
 
 	powerToBeInserted := model.Power{
 		DisciplineID: disciplineId,
@@ -15,6 +15,7 @@ func AddPower(disciplineId uint, name string, description string,
 		Duration:     duration,
 		System:       system,
 		Kind:         ptype,
+		Amalgam:      amalgam,
 		Level:        level,
 	}
 	InsertIntoTable(&powerToBeInserted)

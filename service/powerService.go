@@ -15,9 +15,10 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 	name := nameLevelType[0]
 	levelStr := nameLevelType[1]
 	powerType := nameLevelType[2]
-	costDuration := SplitModalInput(dataModal["power-cost-duration"].(string), "|", 2)
+	costDuration := SplitModalInput(dataModal["power-cost-duration-amalgam"].(string), "|", 3)
 	cost := costDuration[0]
 	duration := costDuration[1]
+	amalgam := costDuration[2]
 
 	level := ConvertStringToInt(levelStr)
 	if level < 1 || level > 10 {
@@ -33,6 +34,7 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 		duration,
 		dataModal["power-system"].(string),
 		powerType,
+		amalgam,
 		level,
 	)
 
