@@ -91,3 +91,7 @@ func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.Interaction
 	}
 
 }
+
+func ShowDisciplineInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline model.Discipline) {
+
+}

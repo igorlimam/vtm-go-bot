@@ -2,6 +2,7 @@ package service
 
 import (
 	"log"
+	"strconv"
 	"vtm-go-bot/model"
 	"vtm-go-bot/repository"
 
@@ -22,8 +23,13 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate) map[string]s
 	return status
 }
 
-func GetDisciplineByID(id uint) model.Discipline {
-	discipline := repository.GetDisciplineById(id)
+func GetDisciplineByID(idStr string) model.Discipline {
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Failed to parse id '%s': %v", idStr, err)
+		return model.Discipline{}
+	}
+	discipline := repository.GetDisciplineById(uint(id))
 	return discipline
 }
 

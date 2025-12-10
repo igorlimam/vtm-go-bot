@@ -134,6 +134,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-clan":
 		checkGuildOwner(s, interaction)
 		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines())
+	case "disciplina":
+		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
+		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))
 	}
 
 }

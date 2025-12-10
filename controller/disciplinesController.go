@@ -17,3 +17,8 @@ func AddDiscipline(session *discordgo.Session, interaction *discordgo.Interactio
 func GetAllDisciplines() []model.Discipline {
 	return service.GetAllDisciplines()
 }
+
+func GetDisciplineByID(id string) model.Discipline {
+	discipline := service.GetDisciplineByID(id)
+	return discipline
+}
