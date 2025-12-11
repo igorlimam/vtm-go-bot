@@ -162,7 +162,7 @@ func ConfirmDeleteDiscipline(s *discordgo.Session, interaction *discordgo.Intera
 		Style:    discordgo.DangerButton,
 	}
 	cancelBtn := discordgo.Button{
-		CustomID: "cancel-delete-discipline|" + fmt.Sprintf("%d", discipline.ID),
+		CustomID: "cancel-delete-discipline",
 		Label:    "Não",
 		Style:    discordgo.SecondaryButton,
 	}
