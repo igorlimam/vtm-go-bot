@@ -10,7 +10,7 @@ import (
 
 func AddPower(session *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineId string) string {
 	log.Println("AddPower command invoked")
-	status := service.AddPowerService(interaction, disciplineId)["status"]
+	status := service.AddPowerService(interaction, disciplineId, "")["status"]
 	return status
 }
 
@@ -24,4 +24,10 @@ func GetDisciplinePowersByID(disciplineID string) []model.Power {
 
 func GetPowerById(powerID string) model.Power {
 	return service.GetPowerById(powerID)
+}
+
+func UpdatePower(s *discordgo.Session, interaction *discordgo.InteractionCreate, powerID string, disciplineID string) string {
+	log.Println("UpdatePower command invoked")
+	status := service.AddPowerService(interaction, disciplineID, powerID)["status"]
+	return status
 }

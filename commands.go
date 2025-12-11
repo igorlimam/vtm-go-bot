@@ -65,6 +65,10 @@ func RegisterCommands(session *discordgo.Session) {
 		"update-clan": {
 			{"name": "clan", "description": "Clã a ser atualizado"},
 		},
+		"update-poder": {
+			{"name": "disciplina", "description": "Disciplina do poder"},
+			{"name": "poder", "description": "Poder a ser atualizado"},
+		},
 	}
 
 	for command, commandMap := range readCommands {
@@ -118,6 +122,11 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		case "update-clan-modal":
 			status := controller.UpdateClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
+		case "update-power-modal":
+			powerID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[1]
+			disciplineID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[2]
+			status := controller.UpdatePower(s, interaction, powerID, disciplineID)
+			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
@@ -126,7 +135,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		customID := strings.Split(data.CustomID, "|")[0]
 		switch customID {
 		case "select-discipline-for-power":
-			view.AddPowerView(s, interaction, data.Values[0])
+			view.AddPowerView(s, interaction, data.Values[0], nil)
 		case "select-disciplines-for-clan":
 			clanID := strings.Split(data.CustomID, "|")[1]
 			var clan model.Clan
@@ -212,6 +221,12 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		selectedDisciplines := controller.GetClanDisciplinesById(clanID)
 		disciplines := controller.GetAllDisciplines()
 		view.StringSelectClanDisciplines(s, interaction, disciplines, selectedDisciplines, clanID)
+	case "update-poder":
+		checkGuildOwner(s, interaction)
+		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
+		powerID := interaction.ApplicationCommandData().Options[1].StringValue()
+		power := controller.GetPowerById(powerID)
+		view.AddPowerView(s, interaction, disciplineID, &power)
 	}
 
 }

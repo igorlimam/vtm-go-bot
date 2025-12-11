@@ -22,6 +22,27 @@ func AddPower(disciplineId uint, name string, description string,
 	return map[string]string{"status": "Poder adicionado com sucesso!"}
 }
 
+func UpdatePower(id uint, disciplineId uint, name string, description string,
+	dicePool string, cost string, duration string, system string,
+	ptype string, amalgam string, level int) map[string]string {
+
+	powerToBeUpdated := model.Power{
+		ID:           id,
+		DisciplineID: disciplineId,
+		Name:         name,
+		Description:  description,
+		DicePool:     dicePool,
+		Cost:         cost,
+		Duration:     duration,
+		System:       system,
+		Kind:         ptype,
+		Amalgam:      amalgam,
+		Level:        level,
+	}
+	UpdateTable(&powerToBeUpdated)
+	return map[string]string{"status": "Poder atualizado com sucesso!"}
+}
+
 func GetAllPowers() []model.Power {
 	var powers []model.Power
 	GetAll(&powers)

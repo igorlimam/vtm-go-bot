@@ -8,7 +8,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId string) map[string]string {
+func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId string, powerId string) map[string]string {
 	dataModal := ModalToMap(interaction)
 	disciplineIdUint, _ := strconv.ParseUint(disciplineId, 10, 64)
 
@@ -26,18 +26,41 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 		return map[string]string{"status": "PODER NÃO CADASTRADO! Level inválido! Deve ser entre 1 e 10."}
 	}
 
-	status := repository.AddPower(
-		uint(disciplineIdUint),
-		name,
-		dataModal["power-description"].(string),
-		dataModal["power-dice-pool"].(string),
-		cost,
-		duration,
-		dataModal["power-system"].(string),
-		powerType,
-		amalgam,
-		level,
-	)
+	var status map[string]string
+
+	if powerId != "" {
+		// Updating existing power
+		powerIdUint, err := strconv.ParseUint(powerId, 10, 64)
+		if err != nil {
+			return map[string]string{"status": "PODER NÃO ATUALIZADO! ID inválido."}
+		}
+		status = repository.UpdatePower(
+			uint(powerIdUint),
+			uint(disciplineIdUint),
+			name,
+			dataModal["power-description"].(string),
+			dataModal["power-dice-pool"].(string),
+			cost,
+			duration,
+			dataModal["power-system"].(string),
+			powerType,
+			amalgam,
+			level,
+		)
+	} else {
+		status = repository.AddPower(
+			uint(disciplineIdUint),
+			name,
+			dataModal["power-description"].(string),
+			dataModal["power-dice-pool"].(string),
+			cost,
+			duration,
+			dataModal["power-system"].(string),
+			powerType,
+			amalgam,
+			level,
+		)
+	}
 
 	return status
 }

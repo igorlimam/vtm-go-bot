@@ -1,8 +1,8 @@
 package model
 
 type Power struct {
-	ID           uint `gorm:"primaryKey"`
-	DisciplineID uint
+	ID           uint       `gorm:"primaryKey"`
+	DisciplineID uint       `gorm:"not null;index"`
 	Discipline   Discipline `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 
 	Name        string

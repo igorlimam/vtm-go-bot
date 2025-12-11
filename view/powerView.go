@@ -40,14 +40,31 @@ func PowerSelectDisciplineView(s *discordgo.Session, interaction *discordgo.Inte
 
 }
 
-func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineId string) {
+func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineId string, power *model.Power) {
+	customID := "add-power-modal|" + disciplineId
+	title := "Adicionar Novo Poder"
+	nameLevelKindValue := ""
+	descriptionValue := ""
+	dicePoolValue := ""
+	costDurationAmalgamValue := ""
+	systemValue := ""
+
+	if power != nil {
+		customID = "update-power-modal|" + fmt.Sprintf("%d", power.ID) + "|" + disciplineId
+		title = "Atualizar Poder"
+		nameLevelKindValue = fmt.Sprintf("%s|%d|%s", power.Name, power.Level, power.Kind)
+		descriptionValue = power.Description
+		dicePoolValue = power.DicePool
+		costDurationAmalgamValue = fmt.Sprintf("%s|%s|%s", power.Cost, power.Duration, power.Amalgam)
+		systemValue = power.System
+	}
 	err := s.InteractionRespond(
 		interaction.Interaction,
 		&discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseModal,
 			Data: &discordgo.InteractionResponseData{
-				CustomID: "add-power-modal|" + disciplineId,
-				Title:    "Adicionar Novo Poder",
+				CustomID: customID,
+				Title:    title,
 				Components: []discordgo.MessageComponent{
 					discordgo.ActionsRow{
 						Components: []discordgo.MessageComponent{
@@ -55,6 +72,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-name-level-type",
 								Label:    "Nome|Nivel|Tipo - \"Fata Morgana|1|Mental\"",
 								Style:    discordgo.TextInputShort,
+								Value:    nameLevelKindValue,
 							},
 						},
 					},
@@ -64,6 +82,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-description",
 								Label:    "Descrição do Poder",
 								Style:    discordgo.TextInputParagraph,
+								Value:    descriptionValue,
 							},
 						},
 					},
@@ -73,6 +92,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-dice-pool",
 								Label:    "Parada de Dados",
 								Style:    discordgo.TextInputShort,
+								Value:    dicePoolValue,
 							},
 						},
 					},
@@ -83,6 +103,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-cost-duration-amalgam",
 								Label:    "Custo|Duração|Amalgama",
 								Style:    discordgo.TextInputShort,
+								Value:    costDurationAmalgamValue,
 							},
 						},
 					},
@@ -92,6 +113,7 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 								CustomID: "power-system",
 								Label:    "Sistema",
 								Style:    discordgo.TextInputParagraph,
+								Value:    systemValue,
 							},
 						},
 					},
