@@ -61,3 +61,10 @@ func UpdateTable(tableInstance interface{}) {
 		log.Fatalf("Error updating record: %v", err.Error)
 	}
 }
+
+func DeleteFromTable(tableInstance interface{}) {
+	err := DB.Delete(tableInstance)
+	if err.Error != nil {
+		log.Fatalf("Error deleting record: %v", err.Error)
+	}
+}

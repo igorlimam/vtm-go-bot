@@ -49,3 +49,15 @@ func GetDisciplineByName(name string) model.Discipline {
 	GetByField(&disciplines, "name", name)
 	return disciplines[0]
 }
+
+func DeleteDiscipline(id uint) map[string]string {
+	var discipline model.Discipline
+	GetByID(&discipline, id)
+	if discipline.ID == 0 {
+		log.Printf("Discipline with ID %d not found for deletion\n", id)
+		return map[string]string{"status": "Disciplina não encontrada!"}
+	}
+	DeleteFromTable(&discipline)
+	log.Printf("Deleted Discipline ID %d: %s\n", id, discipline.Name)
+	return map[string]string{"status": "Disciplina deletada com sucesso!"}
+}

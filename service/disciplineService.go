@@ -59,3 +59,18 @@ func GetAllDisciplines() []model.Discipline {
 	disciplines := repository.GetAllDisciplines()
 	return disciplines
 }
+
+func DeleteDiscipline(idStr string) string {
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		log.Printf("Failed to parse id '%s': %v", idStr, err)
+		return "DISCIPLINA NÃO DELETADA! ID inválido."
+	}
+	status := repository.DeleteDiscipline(uint(id))
+	if err != nil {
+		log.Printf("Failed to delete discipline ID %d: %v", id, err)
+		return "DISCIPLINA NÃO DELETADA! Ocorreu um erro ao deletar."
+	}
+	log.Printf("Deleted Discipline ID %d\n", id)
+	return status["status"]
+}

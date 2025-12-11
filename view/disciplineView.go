@@ -154,3 +154,30 @@ func ShowDisciplineInfoView(s *discordgo.Session, interaction *discordgo.Interac
 		},
 	})
 }
+
+func ConfirmDeleteDiscipline(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline model.Discipline) {
+	confirmBtn := discordgo.Button{
+		CustomID: "confirm-delete-discipline|" + fmt.Sprintf("%d", discipline.ID),
+		Label:    "Sim",
+		Style:    discordgo.DangerButton,
+	}
+	cancelBtn := discordgo.Button{
+		CustomID: "cancel-delete-discipline|" + fmt.Sprintf("%d", discipline.ID),
+		Label:    "Não",
+		Style:    discordgo.SecondaryButton,
+	}
+
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("Tem certeza que deseja deletar a disciplina **%s**?", discipline.Name),
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{Components: []discordgo.MessageComponent{confirmBtn, cancelBtn}},
+			},
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to confirm delete discipline interaction:", err)
+	}
+}

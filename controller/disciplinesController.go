@@ -28,3 +28,9 @@ func GetDisciplineByID(id string) model.Discipline {
 	discipline := service.GetDisciplineByID(id)
 	return discipline
 }
+
+func DeleteDiscipline(s *discordgo.Session, interaction *discordgo.InteractionCreate, idStr string) string {
+	log.Println("DeleteDiscipline command invoked")
+	status := service.DeleteDiscipline(idStr)
+	return status
+}

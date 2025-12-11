@@ -48,7 +48,7 @@ func RegisterCommands(session *discordgo.Session) {
 		}
 	}
 
-	readCommands := map[string][]map[string]string{
+	selectionCommands := map[string][]map[string]string{
 		"disciplina": {
 			{"name": "disciplina", "description": "Fornece informações sobre uma disciplina específica"},
 		},
@@ -69,9 +69,12 @@ func RegisterCommands(session *discordgo.Session) {
 			{"name": "disciplina", "description": "Disciplina do poder"},
 			{"name": "poder", "description": "Poder a ser atualizado"},
 		},
+		"delete-disciplina": {
+			{"name": "disciplina", "description": "Disciplina a ser deletada"},
+		},
 	}
 
-	for command, commandMap := range readCommands {
+	for command, commandMap := range selectionCommands {
 		var option []*discordgo.ApplicationCommandOption
 		for _, params := range commandMap {
 			option = append(option, &discordgo.ApplicationCommandOption{
@@ -144,6 +147,13 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			}
 			view.AddClanView(s, interaction, data.Values, &clan)
 			log.Printf("Selected disciplines for clan: %v", data.Values)
+		case "confirm-delete-discipline":
+			disciplineID := strings.Split(data.CustomID, "|")[1]
+			status := controller.DeleteDiscipline(s, interaction, disciplineID)
+			view.ResolveResponse(s, interaction, status)
+		default:
+			status := "Interação Cancelada"
+			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
@@ -227,6 +237,13 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		powerID := interaction.ApplicationCommandData().Options[1].StringValue()
 		power := controller.GetPowerById(powerID)
 		view.AddPowerView(s, interaction, disciplineID, &power)
+	case "delete-disciplina":
+		checkGuildOwner(s, interaction)
+		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
+		view.ConfirmDeleteDiscipline(s, interaction, controller.GetDisciplineByID(disciplineID))
+	default:
+		status := "Interação Cancelada"
+		view.ResolveResponse(s, interaction, status)
 	}
 
 }
