@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"vtm-go-bot/model"
@@ -84,73 +83,63 @@ func AddPowerView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 
 func PowerInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, query string, powers []model.Power) {
 
-	choices := []*discordgo.ApplicationCommandOptionChoice{}
+	options := []map[string]string{}
 	for _, power := range powers {
-		if strings.Contains(strings.ToLower(power.Name), query) && (len(choices) < 25) {
-			choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-				Name:  power.Name,
-				Value: fmt.Sprintf("%d", power.ID),
+		if strings.Contains(strings.ToLower(power.Name), query) && (len(options) < 25) {
+			options = append(options, map[string]string{
+				"label": power.Name,
+				"value": fmt.Sprintf("%d", power.ID),
 			})
 		}
 	}
-	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
-		Data: &discordgo.InteractionResponseData{
-			Choices: choices,
-		},
-	})
 
-	if err != nil {
-		log.Println("Error responding to autocomplete POWER interaction:", err)
-	}
+	AutoComplete(s, interaction, options)
 }
 
 func ShowPowerInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, power model.Power) {
-	embed := &discordgo.MessageEmbed{
-		Title:       power.Name,
-		Description: power.Description,
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "Parada de dados",
-				Value:  power.DicePool,
-				Inline: true,
-			},
-			{
-				Name:   "Custo",
-				Value:  power.Cost,
-				Inline: true,
-			},
-			{
-				Name:   "Duração",
-				Value:  power.Duration,
-				Inline: false,
-			},
-			{
-				Name:   "Tipo",
-				Value:  power.Kind,
-				Inline: true,
-			},
-			{
-				Name:   "Amalgama",
-				Value:  power.Amalgam,
-				Inline: true,
-			},
-			{
-				Name:   "Nivel",
-				Value:  strconv.Itoa(power.Level),
-				Inline: true,
-			},
-			{
-				Name:   "Sistema",
-				Value:  power.System,
-				Inline: false,
-			},
-		},
-	}
-	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
+
+	embedFields := []map[string]string{}
+
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Descrição",
+		"value":  power.Description,
+		"inline": "false",
 	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Parada de dados",
+		"value":  power.DicePool,
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Custo",
+		"value":  power.Cost,
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Duração",
+		"value":  power.Duration,
+		"inline": "false",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Tipo",
+		"value":  power.Kind,
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Amalgama",
+		"value":  power.Amalgam,
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Nivel",
+		"value":  strconv.Itoa(power.Level),
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Sistema",
+		"value":  power.System,
+		"inline": "false",
+	})
+
+	EmbedMessage(s, interaction, embedFields, power.Name, "")
 }
