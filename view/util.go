@@ -50,7 +50,7 @@ func Modal(s *discordgo.Session, interaction *discordgo.InteractionCreate, custo
 	}
 }
 
-func SelectMenu(s *discordgo.Session, interaction *discordgo.InteractionCreate, options []map[string]string, customID string, placeholder string, contentPlaceholder string) {
+func SelectMenu(s *discordgo.Session, interaction *discordgo.InteractionCreate, options []map[string]string, customID string, placeholder string, contentPlaceholder string, max int) {
 
 	var choices []discordgo.SelectMenuOption
 	for _, option := range options {
@@ -70,7 +70,7 @@ func SelectMenu(s *discordgo.Session, interaction *discordgo.InteractionCreate, 
 				CustomID:    customID,
 				Placeholder: placeholder,
 				MinValues:   &min,
-				MaxValues:   len(choices),
+				MaxValues:   max,
 				Options:     choices,
 			},
 		},

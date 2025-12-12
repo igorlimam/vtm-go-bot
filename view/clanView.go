@@ -10,7 +10,7 @@ import (
 )
 
 func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline, selectedDisciplines []model.Discipline, clanID string) {
-
+	maxDisciplines := 3
 	var options []map[string]string
 
 	for _, discipline := range disciplines {
@@ -34,10 +34,11 @@ func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.In
 	placeholder := "Selecione pelo menos uma disciplina"
 	contentPlaceholder := "Escolha as disciplinas para o novo clã:"
 
-	SelectMenu(s, interaction, options, customID, placeholder, contentPlaceholder)
+	SelectMenu(s, interaction, options, customID, placeholder, contentPlaceholder, maxDisciplines)
 }
 
 func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDs []string, clan *model.Clan) {
+
 	suffix := strings.Join(disciplineIDs, "-")
 
 	customID := "add-clan-modal|" + suffix
