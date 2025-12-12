@@ -33,20 +33,6 @@ func RegisterCommands(session *discordgo.Session) {
 		"add-clan":       "Adiciona um novo clã",
 	}
 
-	for name, description := range commands {
-		_, err := session.ApplicationCommandCreate(
-			session.State.User.ID,
-			session.State.Guilds[0].ID,
-			&discordgo.ApplicationCommand{
-				Name:        name,
-				Description: description,
-			},
-		)
-		if err != nil {
-			log.Fatalf("Cannot create '%v' command: %v", name, err)
-		}
-	}
-
 	selectionCommands := map[string][]map[string]string{
 		"disciplina": {
 			{"name": "disciplina", "description": "Fornece informações sobre uma disciplina específica"},
@@ -73,10 +59,33 @@ func RegisterCommands(session *discordgo.Session) {
 		},
 	}
 
-	for command, commandMap := range selectionCommands {
-		var option []*discordgo.ApplicationCommandOption
-		for _, params := range commandMap {
-			option = append(option, &discordgo.ApplicationCommandOption{
+	var all []*discordgo.ApplicationCommand
+
+	for cmd, desc := range commands {
+		all = append(all, &discordgo.ApplicationCommand{
+			Name:        cmd,
+			Description: desc,
+		})
+	}
+
+	for name, description := range commands {
+		_, err := session.ApplicationCommandCreate(
+			session.State.User.ID,
+			session.State.Guilds[0].ID,
+			&discordgo.ApplicationCommand{
+				Name:        name,
+				Description: description,
+			},
+		)
+		if err != nil {
+			log.Fatalf("Cannot create '%v' command: %v", name, err)
+		}
+	}
+
+	for cmd, cmdMap := range selectionCommands {
+		var options []*discordgo.ApplicationCommandOption
+		for _, params := range cmdMap {
+			options = append(options, &discordgo.ApplicationCommandOption{
 				Type:         discordgo.ApplicationCommandOptionString,
 				Name:         params["name"],
 				Description:  params["description"],
@@ -84,18 +93,20 @@ func RegisterCommands(session *discordgo.Session) {
 				Autocomplete: true,
 			})
 		}
-		_, err := session.ApplicationCommandCreate(
-			session.State.User.ID,
-			session.State.Guilds[0].ID,
-			&discordgo.ApplicationCommand{
-				Name:        command,
-				Description: "Mostrar informações sobre " + command,
-				Options:     option,
-			},
-		)
-		if err != nil {
-			log.Fatalf("Cannot create '%v' command: %v", command, err)
-		}
+		all = append(all, &discordgo.ApplicationCommand{
+			Name:        cmd,
+			Description: "Mostrar informações sobre " + cmd,
+			Options:     options,
+		})
+	}
+
+	_, err := session.ApplicationCommandBulkOverwrite(
+		session.State.User.ID,
+		session.State.Guilds[0].ID,
+		all,
+	)
+	if err != nil {
+		log.Fatalf("Cannot bulk overwrite commands: %v", err)
 	}
 
 	log.Println("Commands registered successfully.")

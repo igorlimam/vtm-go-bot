@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -30,6 +29,7 @@ func main() {
 
 	sess.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
+	log.Println("Openning session...")
 	err = sess.Open()
 	if err != nil {
 		log.Fatal(err)
@@ -37,9 +37,11 @@ func main() {
 
 	defer sess.Close()
 
+	log.Println("Bot is now running. Registering commands...")
 	RegisterCommands(sess)
+	log.Println("Registering handlers...")
 	sess.AddHandler(RegisterHandlers)
-	fmt.Println("BOT IS ONLINE!!!")
+	log.Println("BOT IS ONLINE!!!")
 
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)

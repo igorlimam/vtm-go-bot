@@ -29,77 +29,40 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 		threatValue = discipline.Threat
 	}
 
-	err := s.InteractionRespond(
-		interaction.Interaction,
-		&discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseModal,
-			Data: &discordgo.InteractionResponseData{
-				CustomID: customID,
-				Title:    title,
-				Components: []discordgo.MessageComponent{
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID:    "discipline-name",
-								Label:       "Nome da Disciplina",
-								Style:       discordgo.TextInputShort,
-								Value:       nameValue,
-								Placeholder: "Insira o nome da disciplina",
-								Required:    true,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID:    "discipline-type",
-								Label:       "Tipo da Disciplina",
-								Style:       discordgo.TextInputShort,
-								Value:       typeValue,
-								Placeholder: "Insira o tipo da disciplina",
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID:    "discipline-resonance",
-								Label:       "Ressonância da Disciplina",
-								Style:       discordgo.TextInputShort,
-								Value:       resonanceValue,
-								Placeholder: "Insira a ressonância da disciplina",
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID:    "discipline-description",
-								Label:       "Descrição da Disciplina",
-								Style:       discordgo.TextInputParagraph,
-								Value:       descriptionValue,
-								Placeholder: "Insira a descrição da disciplina",
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID:    "discipline-threat",
-								Label:       "Ameaça da Disciplina",
-								Style:       discordgo.TextInputParagraph,
-								Value:       threatValue,
-								Placeholder: "Insira a ameaça da disciplina",
-							},
-						},
-					},
-				},
-			},
+	fields := []map[string]string{
+		{
+			"customID": "discipline-name",
+			"label":    "Nome da Disciplina",
+			"style":    "short",
+			"value":    nameValue,
 		},
-	)
-	if err != nil {
-		log.Println("Error responding with modal:", err)
+		{
+			"customID": "discipline-type",
+			"label":    "Tipo da Disciplina",
+			"style":    "short",
+			"value":    typeValue,
+		},
+		{
+			"customID": "discipline-resonance",
+			"label":    "Ressonância da Disciplina",
+			"style":    "short",
+			"value":    resonanceValue,
+		},
+		{
+			"customID": "discipline-description",
+			"label":    "Descrição da Disciplina",
+			"style":    "paragraph",
+			"value":    descriptionValue,
+		},
+		{
+			"customID": "discipline-threat",
+			"label":    "Ameaça da Disciplina",
+			"style":    "paragraph",
+			"value":    threatValue,
+		},
 	}
+
+	Modal(s, interaction, customID, title, fields)
 }
 
 func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline) {
