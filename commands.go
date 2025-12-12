@@ -4,7 +4,6 @@ import (
 	"log"
 	"strings"
 	"vtm-go-bot/controller"
-	"vtm-go-bot/model"
 	"vtm-go-bot/view"
 
 	"github.com/bwmarrin/discordgo"
@@ -141,11 +140,14 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			view.AddPowerView(s, interaction, data.Values[0], nil)
 		case "select-disciplines-for-clan":
 			clanID := strings.Split(data.CustomID, "|")[1]
-			var clan model.Clan
-			if clanID != "" {
-				clan = controller.GetClanByID(clanID)
+
+			if clanID != "0" {
+				clan := controller.GetClanByID(clanID)
+				view.AddClanView(s, interaction, data.Values, &clan)
+			} else {
+				view.AddClanView(s, interaction, data.Values, nil)
 			}
-			view.AddClanView(s, interaction, data.Values, &clan)
+
 			log.Printf("Selected disciplines for clan: %v", data.Values)
 		case "confirm-delete-discipline":
 			disciplineID := strings.Split(data.CustomID, "|")[1]

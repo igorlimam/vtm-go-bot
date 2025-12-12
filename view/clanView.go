@@ -11,51 +11,31 @@ import (
 )
 
 func StringSelectClanDisciplines(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline, selectedDisciplines []model.Discipline, clanID string) {
-	var choices []discordgo.SelectMenuOption
-	if selectedDisciplines != nil {
-		for _, discipline := range disciplines {
-			isSelected := slices.ContainsFunc(selectedDisciplines, func(d model.Discipline) bool { return d.ID == discipline.ID })
-			choices = append(choices, discordgo.SelectMenuOption{
-				Label:   discipline.Name,
-				Value:   fmt.Sprintf("%d", discipline.ID),
-				Default: isSelected,
-			})
+
+	var options []map[string]string
+
+	for _, discipline := range disciplines {
+		var def string
+		if selectedDisciplines == nil {
+			def = "false"
+		} else {
+			def = fmt.Sprintf("%t", slices.ContainsFunc(selectedDisciplines, func(d model.Discipline) bool { return d.ID == discipline.ID }))
 		}
-	} else {
-		for _, discipline := range disciplines {
-			choices = append(choices, discordgo.SelectMenuOption{
-				Label: discipline.Name,
-				Value: fmt.Sprintf("%d", discipline.ID),
-			})
-		}
+		options = append(options, map[string]string{
+			"label":   discipline.Name,
+			"value":   fmt.Sprintf("%d", discipline.ID),
+			"default": def,
+		})
 	}
 
-	min := 1
-	selectMenu := discordgo.ActionsRow{
-		Components: []discordgo.MessageComponent{
-			&discordgo.SelectMenu{
-				CustomID:    "select-disciplines-for-clan|" + clanID,
-				Placeholder: "Selecione pelo menos uma disciplinas",
-				MinValues:   &min,
-				MaxValues:   len(choices),
-				Options:     choices,
-			},
-		},
+	if clanID == "" {
+		clanID = "0"
 	}
+	customID := "select-disciplines-for-clan|" + clanID
+	placeholder := "Selecione pelo menos uma disciplina"
+	contentPlaceholder := "Escolha as disciplinas para o novo clã:"
 
-	err := s.InteractionRespond(
-		interaction.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content:    "Escolha as disciplinas para o novo clã:",
-				Components: []discordgo.MessageComponent{selectMenu},
-			},
-		},
-	)
-
-	if err != nil {
-		log.Println("Error responding to interaction:", err)
-	}
+	SelectMenu(s, interaction, options, customID, placeholder, contentPlaceholder)
 }
 
 func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplineIDs []string, clan *model.Clan) {
@@ -77,62 +57,34 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 		compulsion = clan.Compulsion
 	}
 
-	err := s.InteractionRespond(
-		interaction.Interaction,
-		&discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseModal,
-			Data: &discordgo.InteractionResponseData{
-				CustomID: customID,
-				Title:    title,
-				Components: []discordgo.MessageComponent{
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "clan-name",
-								Label:    "Nome do Clã",
-								Style:    discordgo.TextInputShort,
-								Value:    name,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "clan-description",
-								Label:    "Descrição do Clã",
-								Style:    discordgo.TextInputParagraph,
-								Value:    description,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "clan-bane",
-								Label:    "Fraqueza do Clã",
-								Style:    discordgo.TextInputParagraph,
-								Value:    bane,
-							},
-						},
-					},
-					discordgo.ActionsRow{
-						Components: []discordgo.MessageComponent{
-							discordgo.TextInput{
-								CustomID: "clan-compulsion",
-								Label:    "Compulsão do Clã",
-								Style:    discordgo.TextInputParagraph,
-								Value:    compulsion,
-							},
-						},
-					},
-				},
-			},
+	fields := []map[string]string{
+		{
+			"customID": "clan-name",
+			"label":    "Nome do Clã",
+			"value":    name,
+			"style":    "short",
 		},
-	)
-
-	if err != nil {
-		log.Println("Error responding to interaction:", err)
+		{
+			"customID": "clan-description",
+			"label":    "Descrição do Clã",
+			"value":    description,
+			"style":    "paragraph",
+		},
+		{
+			"customID": "clan-bane",
+			"label":    "Fraqueza do Clã",
+			"value":    bane,
+			"style":    "paragraph",
+		},
+		{
+			"customID": "clan-compulsion",
+			"label":    "Compulsão do Clã",
+			"value":    compulsion,
+			"style":    "paragraph",
+		},
 	}
+
+	Modal(s, interaction, customID, title, fields)
 }
 
 func ClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, clans []model.Clan) {

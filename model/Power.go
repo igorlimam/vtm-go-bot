@@ -13,5 +13,5 @@ type Power struct {
 	System      string
 	Kind        string
 	Amalgam     string `gorm:"default:-"`
-	Level       int
+	Level       int    `gorm:"index"`
 }
