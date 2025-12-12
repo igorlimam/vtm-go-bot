@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"vtm-go-bot/model"
@@ -88,24 +87,16 @@ func AddClanView(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 }
 
 func ClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, clans []model.Clan) {
-	var choices []*discordgo.ApplicationCommandOptionChoice
+
+	options := []map[string]string{}
 	for _, clan := range clans {
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  clan.Name,
-			Value: fmt.Sprintf("%d", clan.ID),
+		options = append(options, map[string]string{
+			"label": clan.Name,
+			"value": fmt.Sprintf("%d", clan.ID),
 		})
 	}
 
-	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
-		Data: &discordgo.InteractionResponseData{
-			Choices: choices,
-		},
-	})
-
-	if err != nil {
-		log.Println("Error responding to autocomplete interaction:", err)
-	}
+	AutoComplete(s, interaction, options)
 }
 
 func ShowClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, clan model.Clan, disciplines []model.Discipline) {
@@ -115,31 +106,22 @@ func ShowClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCr
 		disciplinesList += fmt.Sprintf("- %s\n", discipline.Name)
 	}
 
-	embed := &discordgo.MessageEmbed{
-		Title:       clan.Name,
-		Description: clan.Description,
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "Fraqueza",
-				Value:  clan.Bane,
-				Inline: false,
-			},
-			{
-				Name:   "Compulsão",
-				Value:  clan.Compulsion,
-				Inline: false,
-			},
-			{
-				Name:   "Disciplinas",
-				Value:  disciplinesList,
-				Inline: true,
-			},
-		},
-	}
-	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
+	embedFields := []map[string]string{}
+
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Fraqueza",
+		"value":  clan.Bane,
+		"inline": "false",
 	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Compulsão",
+		"value":  clan.Compulsion,
+		"inline": "false",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Disciplinas",
+		"value":  disciplinesList,
+		"inline": "false",
+	})
+	EmbedMessage(s, interaction, embedFields, clan.Name, clan.Description)
 }

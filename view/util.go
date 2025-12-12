@@ -92,6 +92,53 @@ func SelectMenu(s *discordgo.Session, interaction *discordgo.InteractionCreate, 
 	}
 }
 
+func AutoComplete(s *discordgo.Session, interaction *discordgo.InteractionCreate, options []map[string]string) {
+
+	var choices []*discordgo.ApplicationCommandOptionChoice
+	for _, option := range options {
+		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
+			Name:  option["label"],
+			Value: option["value"],
+		})
+	}
+
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
+		Data: &discordgo.InteractionResponseData{
+			Choices: choices,
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to autocomplete interaction:", err)
+	}
+}
+
+func EmbedMessage(s *discordgo.Session, interaction *discordgo.InteractionCreate, fields []map[string]string, title string, description string) {
+
+	embedFields := []*discordgo.MessageEmbedField{}
+	for _, field := range fields {
+		embedFields = append(embedFields, &discordgo.MessageEmbedField{
+			Name:   field["name"],
+			Value:  field["value"],
+			Inline: field["inline"] == "true",
+		})
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Title:       title,
+		Description: description,
+		Fields:      embedFields,
+	}
+
+	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Embeds: []*discordgo.MessageEmbed{embed},
+		},
+	})
+}
+
 func ResolveResponse(s *discordgo.Session, interaction *discordgo.InteractionCreate, response string) {
 	err := s.InteractionRespond(
 		interaction.Interaction,
