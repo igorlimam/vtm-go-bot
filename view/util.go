@@ -110,7 +110,7 @@ func AutoComplete(s *discordgo.Session, interaction *discordgo.InteractionCreate
 	})
 
 	if err != nil {
-		log.Println("Error responding to autocomplete interaction:", err)
+		log.Println("Error responding to AUTOCOMPLETE interaction:", err)
 	}
 }
 
@@ -131,12 +131,43 @@ func EmbedMessage(s *discordgo.Session, interaction *discordgo.InteractionCreate
 		Fields:      embedFields,
 	}
 
-	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{embed},
 		},
 	})
+
+	if err != nil {
+		log.Println("Error responding to EMBED MESSAGE interaction:", err)
+	}
+}
+
+func ConfirmationButton(s *discordgo.Session, interaction *discordgo.InteractionCreate, customIDConfirmation string, customIDCancel string, contentMessage string) {
+	confirmBtn := discordgo.Button{
+		CustomID: customIDConfirmation,
+		Label:    "Sim",
+		Style:    discordgo.SecondaryButton,
+	}
+	cancelBtn := discordgo.Button{
+		CustomID: customIDCancel,
+		Label:    "NÃO",
+		Style:    discordgo.DangerButton,
+	}
+
+	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: contentMessage,
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{Components: []discordgo.MessageComponent{confirmBtn, cancelBtn}},
+			},
+		},
+	})
+
+	if err != nil {
+		log.Println("Error responding to CONFIRM BUTTON interaction:", err)
+	}
 }
 
 func ResolveResponse(s *discordgo.Session, interaction *discordgo.InteractionCreate, response string) {
@@ -150,6 +181,6 @@ func ResolveResponse(s *discordgo.Session, interaction *discordgo.InteractionCre
 		},
 	)
 	if err != nil {
-		log.Printf("Failed to respond to interaction: %v", err)
+		log.Printf("Failed to respond to RESPONSE interaction: %v", err)
 	}
 }

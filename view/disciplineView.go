@@ -2,14 +2,13 @@ package view
 
 import (
 	"fmt"
-	"log"
 	"vtm-go-bot/model"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline *model.Discipline) {
-	customID := "add-discipline-modal"
+	customID := "add-discipline-modal|0"
 	title := "Adicionar Nova Disciplina"
 
 	// prefill values if updating
@@ -67,80 +66,45 @@ func AddDisciplineView(s *discordgo.Session, interaction *discordgo.InteractionC
 
 func DisciplinaInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, disciplines []model.Discipline) {
 
-	var choices []*discordgo.ApplicationCommandOptionChoice
+	options := []map[string]string{}
 	for _, discipline := range disciplines {
-		choices = append(choices, &discordgo.ApplicationCommandOptionChoice{
-			Name:  discipline.Name,
-			Value: fmt.Sprintf("%d", discipline.ID),
+		options = append(options, map[string]string{
+			"label": discipline.Name,
+			"value": fmt.Sprintf("%d", discipline.ID),
 		})
 	}
 
-	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionApplicationCommandAutocompleteResult,
-		Data: &discordgo.InteractionResponseData{
-			Choices: choices,
-		},
-	})
-
-	if err != nil {
-		log.Println("Error responding to autocomplete interaction:", err)
-	}
-
+	AutoComplete(s, interaction, options)
 }
 
 func ShowDisciplineInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline model.Discipline) {
-	embed := &discordgo.MessageEmbed{
-		Title:       discipline.Name,
-		Description: discipline.Description,
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "Tipo",
-				Value:  discipline.Dtype,
-				Inline: true,
-			},
-			{
-				Name:   "Ressonância",
-				Value:  discipline.Resonance,
-				Inline: true,
-			},
-			{
-				Name:   "Ameaça",
-				Value:  discipline.Threat,
-				Inline: false,
-			},
-		},
-	}
-	s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{embed},
-		},
+
+	embedFields := []map[string]string{}
+
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Tipo",
+		"value":  discipline.Dtype,
+		"inline": "true",
 	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Ressonância",
+		"value":  discipline.Resonance,
+		"inline": "true",
+	})
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Ameaça",
+		"value":  discipline.Threat,
+		"inline": "false",
+	})
+
+	EmbedMessage(s, interaction, embedFields, discipline.Name, discipline.Description)
 }
 
 func ConfirmDeleteDiscipline(s *discordgo.Session, interaction *discordgo.InteractionCreate, discipline model.Discipline) {
-	confirmBtn := discordgo.Button{
-		CustomID: "confirm-delete-discipline|" + fmt.Sprintf("%d", discipline.ID),
-		Label:    "Sim",
-		Style:    discordgo.DangerButton,
-	}
-	cancelBtn := discordgo.Button{
-		CustomID: "cancel-delete-discipline",
-		Label:    "Não",
-		Style:    discordgo.SecondaryButton,
-	}
 
-	err := s.InteractionRespond(interaction.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Tem certeza que deseja deletar a disciplina **%s**?", discipline.Name),
-			Components: []discordgo.MessageComponent{
-				discordgo.ActionsRow{Components: []discordgo.MessageComponent{confirmBtn, cancelBtn}},
-			},
-		},
-	})
+	customIDConfirmation := "confirm-delete-discipline|" + fmt.Sprintf("%d", discipline.ID)
+	customIDCancel := "cancel-delete-discipline"
+	messageContent := fmt.Sprintf("Tem certeza que deseja deletar a disciplina **%s**?", discipline.Name)
 
-	if err != nil {
-		log.Println("Error responding to confirm delete discipline interaction:", err)
-	}
+	ConfirmationButton(s, interaction, customIDConfirmation, customIDCancel, messageContent)
 }
