@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"vtm-go-bot/controller"
@@ -140,6 +141,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			disciplineID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[2]
 			status := controller.UpdatePower(s, interaction, powerID, disciplineID)
 			view.ResolveResponse(s, interaction, status)
+		default:
+			status := "Interação EM MODAL Cancelada"
+			view.ResolveResponse(s, interaction, status)
 		}
 	}
 
@@ -165,7 +169,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			status := controller.DeleteDiscipline(s, interaction, disciplineID)
 			view.ResolveResponse(s, interaction, status)
 		default:
-			status := "Interação Cancelada"
+			status := "Interação EM MESSAGE COMPONENT Cancelada"
 			view.ResolveResponse(s, interaction, status)
 		}
 	}
@@ -255,7 +259,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ConfirmDeleteDiscipline(s, interaction, controller.GetDisciplineByID(disciplineID))
 	default:
-		status := "Interação Cancelada"
+		status := fmt.Sprintf("Comando %s não reconhecido.", interaction.ApplicationCommandData().Name)
 		view.ResolveResponse(s, interaction, status)
 	}
 
