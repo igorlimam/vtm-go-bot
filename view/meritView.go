@@ -22,7 +22,7 @@ func AddMeritView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 
 	name := ""
 	description := ""
-	kind := meritKind //update traga vazio, para adicionar já vem o tipo selecionado
+	kind := meritKind
 	levelsInfo := ""
 
 	if merit != nil {
