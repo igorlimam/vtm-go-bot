@@ -64,3 +64,14 @@ func GetClanByIDService(idStr string) model.Clan {
 	clan := repository.GetClanByID(uint(id))
 	return clan
 }
+
+func DeleteClanService(interaction *discordgo.InteractionCreate, clanID string) map[string]string {
+	id, err := strconv.Atoi(clanID)
+	if err != nil {
+		log.Printf("Failed to parse clanID '%s': %v", clanID, err)
+		return map[string]string{"status": "Erro ao deletar clã: ID inválido."}
+	}
+	status := repository.DeleteClan(uint(id))
+	log.Printf("Deleted Clan ID %d\n", id)
+	return status
+}

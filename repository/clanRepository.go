@@ -42,3 +42,10 @@ func GetClanByID(id uint) model.Clan {
 	GetByID(&clan, id)
 	return clan
 }
+
+func DeleteClan(id uint) map[string]string {
+	var clan model.Clan
+	GetByID(&clan, id)
+	DeleteFromTable(&clan)
+	return map[string]string{"status": "Clan deleted successfully"}
+}

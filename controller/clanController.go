@@ -26,3 +26,8 @@ func UpdateClan(s *discordgo.Session, interaction *discordgo.InteractionCreate, 
 	status := service.AddClanService(interaction, disciplineIDsSuffix, isUpdate)["status"]
 	return status
 }
+
+func DeleteClan(s *discordgo.Session, interaction *discordgo.InteractionCreate, clanID string) string {
+	status := service.DeleteClanService(interaction, clanID)["status"]
+	return status
+}

@@ -58,6 +58,9 @@ func RegisterCommands(session *discordgo.Session) {
 		"delete-disciplina": {
 			{"name": "disciplina", "description": "Disciplina a ser deletada"},
 		},
+		"delete-clan": {
+			{"name": "clan", "description": "Clã a ser deletado"},
+		},
 	}
 
 	var all []*discordgo.ApplicationCommand
@@ -168,6 +171,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			disciplineID := strings.Split(data.CustomID, "|")[1]
 			status := controller.DeleteDiscipline(s, interaction, disciplineID)
 			view.ResolveResponse(s, interaction, status)
+		case "confirm-delete-clan":
+			clanID := strings.Split(data.CustomID, "|")[1]
+			status := controller.DeleteClan(s, interaction, clanID)
+			view.ResolveResponse(s, interaction, status)
 		default:
 			status := "Interação EM MESSAGE COMPONENT Cancelada"
 			view.ResolveResponse(s, interaction, status)
@@ -258,6 +265,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		checkGuildOwner(s, interaction)
 		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ConfirmDeleteDiscipline(s, interaction, controller.GetDisciplineByID(disciplineID))
+	case "delete-clan":
+		checkGuildOwner(s, interaction)
+		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		view.ConfirmDeleteClan(s, interaction, controller.GetClanByID(clanID))
 	default:
 		status := fmt.Sprintf("Comando %s não reconhecido.", interaction.ApplicationCommandData().Name)
 		view.ResolveResponse(s, interaction, status)

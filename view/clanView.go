@@ -126,3 +126,12 @@ func ShowClanInfoView(s *discordgo.Session, interaction *discordgo.InteractionCr
 	})
 	EmbedMessage(s, interaction, embedFields, clan.Name, clan.Description)
 }
+
+func ConfirmDeleteClan(s *discordgo.Session, interaction *discordgo.InteractionCreate, clan model.Clan) {
+
+	customIDConfirmation := "confirm-delete-clan|" + fmt.Sprintf("%d", clan.ID)
+	customIDCancel := "cancel-delete-clan"
+	messageContent := fmt.Sprintf("Tem certeza que deseja deletar o clã **%s**?", clan.Name)
+
+	ConfirmationButton(s, interaction, customIDConfirmation, customIDCancel, messageContent)
+}
