@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"vtm-go-bot/model"
 
@@ -100,7 +99,6 @@ func MeritKindInfoView(s *discordgo.Session, interaction *discordgo.InteractionC
 }
 
 func MeritInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, query string, merits []model.Merit) {
-	log.Printf("MERITS: %v", merits)
 	options := []map[string]string{}
 	for _, merit := range merits {
 		cond := query == "" || strings.Contains(strings.ToLower(merit.Name), query)
@@ -136,4 +134,19 @@ func ShowMeritInfoView(s *discordgo.Session, interaction *discordgo.InteractionC
 	}
 
 	EmbedMessage(s, interaction, embedFields, title, description)
+}
+
+func ConfirmDeleteMerit(s *discordgo.Session, interaction *discordgo.InteractionCreate, meritKind string, merit model.Merit) {
+
+	if meritKind != "Antecedente" {
+		meritKind = "a " + meritKind
+	} else {
+		meritKind = "o " + meritKind
+	}
+
+	content := fmt.Sprintf("Você tem certeza que deseja deletar %s **%s**?", meritKind, merit.Name)
+	confirmCustomID := fmt.Sprintf("confirm-delete-merit|%d", merit.ID)
+	cancelCustomID := "cancel-delete-merit"
+
+	ConfirmationButton(s, interaction, confirmCustomID, cancelCustomID, content)
 }

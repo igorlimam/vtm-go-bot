@@ -40,3 +40,10 @@ func UpdateMerit(id uint, name string, description string, kind string, levelsIn
 	UpdateTable(&meritToBeUpdated)
 	return map[string]string{"status": "Mérito atualizado com sucesso!"}
 }
+
+func DeleteMerit(id uint) map[string]string {
+	var merit model.Merit
+	GetByID(&merit, id)
+	DeleteFromTable(&merit)
+	return map[string]string{"status": "Mérito deletado com sucesso!"}
+}

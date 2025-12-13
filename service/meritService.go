@@ -70,3 +70,13 @@ func GetMeritByID(meritID string) model.Merit {
 func GetMeritsByKind(meritKind string) []model.Merit {
 	return repository.GetMeritsByKind(meritKind)
 }
+
+func DeleteMeritService(interaction *discordgo.InteractionCreate, meritID string) map[string]string {
+	id, err := strconv.Atoi(meritID)
+	if err != nil {
+		log.Printf("Invalid merit ID: %v", err)
+		return map[string]string{"status": "MÉRITO NÃO DELETADO! ID inválido."}
+	}
+	status := repository.DeleteMerit(uint(id))
+	return status
+}

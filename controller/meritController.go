@@ -28,3 +28,8 @@ func UpdateMerit(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 	status := service.AddMeritService(interaction, meritID)["status"]
 	return status
 }
+
+func DeleteMerit(s *discordgo.Session, interaction *discordgo.InteractionCreate, meritID string) string {
+	status := service.DeleteMeritService(interaction, meritID)["status"]
+	return status
+}

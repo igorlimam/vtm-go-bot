@@ -74,6 +74,10 @@ func RegisterCommands(session *discordgo.Session) {
 			{"name": "disciplina", "description": "Disciplina do poder"},
 			{"name": "poder", "description": "Poder a ser deletado"},
 		},
+		"delete-merito": {
+			{"name": "tipo-merito", "description": "Tipo de mérito - Vantagem, Desvantagem, Antecedente"},
+			{"name": "merito", "description": "Mérito a ser deletado"},
+		},
 	}
 
 	var all []*discordgo.ApplicationCommand
@@ -188,6 +192,10 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		case "confirm-delete-power":
 			powerID := strings.Split(data.CustomID, "|")[1]
 			status := controller.DeletePower(s, interaction, powerID)
+			view.ResolveResponse(s, interaction, status)
+		case "confirm-delete-merit":
+			meritID := strings.Split(data.CustomID, "|")[1]
+			status := controller.DeleteMerit(s, interaction, meritID)
 			view.ResolveResponse(s, interaction, status)
 		default:
 			status := "Interação cancelada"
@@ -322,6 +330,13 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		powerID := appData.Options[1].StringValue()
 		power := controller.GetPowerById(powerID)
 		view.ConfirmDeletePower(s, interaction, power, discipline.Name)
+	case "delete-merito":
+		checkGuildOwner(s, interaction)
+		meritKindID := appData.Options[0].StringValue()
+		meritKind := controller.GetMeritKindName(meritKindID)
+		meritID := appData.Options[1].StringValue()
+		merit := controller.GetMeritByID(meritID)
+		view.ConfirmDeleteMerit(s, interaction, meritKind, merit)
 	default:
 		status := fmt.Sprintf("Comando %s não reconhecido.", appData.Name)
 		view.ResolveResponse(s, interaction, status)
