@@ -60,3 +60,10 @@ func GetPowerById(id uint) model.Power {
 	GetByID(&power, id)
 	return power
 }
+
+func DeletePower(id uint) map[string]string {
+	var power model.Power
+	GetByID(&power, id)
+	DeleteFromTable(&power)
+	return map[string]string{"status": "Poder deletado com sucesso!"}
+}

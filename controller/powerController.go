@@ -31,3 +31,8 @@ func UpdatePower(s *discordgo.Session, interaction *discordgo.InteractionCreate,
 	status := service.AddPowerService(interaction, disciplineID, powerID)["status"]
 	return status
 }
+
+func DeletePower(s *discordgo.Session, interaction *discordgo.InteractionCreate, powerID string) string {
+	status := service.DeletePowerService(interaction, powerID)["status"]
+	return status
+}

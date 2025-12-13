@@ -143,3 +143,12 @@ func ShowPowerInfoView(s *discordgo.Session, interaction *discordgo.InteractionC
 
 	EmbedMessage(s, interaction, embedFields, power.Name, "")
 }
+
+func ConfirmDeletePower(s *discordgo.Session, interaction *discordgo.InteractionCreate, power model.Power, disciplineName string) {
+
+	customIDConfirmation := "confirm-delete-power|" + fmt.Sprintf("%d", power.ID)
+	customIDCancel := "cancel-delete-power"
+	messageContent := fmt.Sprintf("Tem certeza que deseja deletar o poder **%s** da disciplina **%s**?", power.Name, disciplineName)
+
+	ConfirmationButton(s, interaction, customIDConfirmation, customIDCancel, messageContent)
+}

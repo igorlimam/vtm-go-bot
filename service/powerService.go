@@ -86,3 +86,12 @@ func GetPowerById(powerID string) model.Power {
 	power := repository.GetPowerById(uint(id))
 	return power
 }
+
+func DeletePowerService(interaction *discordgo.InteractionCreate, powerID string) map[string]string {
+	id, err := strconv.Atoi(powerID)
+	if err != nil {
+		return map[string]string{"status": "Erro ao deletar poder: ID inválido."}
+	}
+	status := repository.DeletePower(uint(id))
+	return status
+}

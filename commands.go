@@ -61,6 +61,10 @@ func RegisterCommands(session *discordgo.Session) {
 		"delete-clan": {
 			{"name": "clan", "description": "Clã a ser deletado"},
 		},
+		"delete-poder": {
+			{"name": "disciplina", "description": "Disciplina do poder"},
+			{"name": "poder", "description": "Poder a ser deletado"},
+		},
 	}
 
 	var all []*discordgo.ApplicationCommand
@@ -175,8 +179,12 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			clanID := strings.Split(data.CustomID, "|")[1]
 			status := controller.DeleteClan(s, interaction, clanID)
 			view.ResolveResponse(s, interaction, status)
+		case "confirm-delete-power":
+			powerID := strings.Split(data.CustomID, "|")[1]
+			status := controller.DeletePower(s, interaction, powerID)
+			view.ResolveResponse(s, interaction, status)
 		default:
-			status := "Interação EM MESSAGE COMPONENT Cancelada"
+			status := "Interação cancelada"
 			view.ResolveResponse(s, interaction, status)
 		}
 	}
@@ -269,6 +277,13 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		checkGuildOwner(s, interaction)
 		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ConfirmDeleteClan(s, interaction, controller.GetClanByID(clanID))
+	case "delete-poder":
+		checkGuildOwner(s, interaction)
+		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
+		discipline := controller.GetDisciplineByID(disciplineID)
+		powerID := interaction.ApplicationCommandData().Options[1].StringValue()
+		power := controller.GetPowerById(powerID)
+		view.ConfirmDeletePower(s, interaction, power, discipline.Name)
 	default:
 		status := fmt.Sprintf("Comando %s não reconhecido.", interaction.ApplicationCommandData().Name)
 		view.ResolveResponse(s, interaction, status)
