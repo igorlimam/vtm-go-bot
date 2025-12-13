@@ -15,8 +15,7 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate, idStr string
 	var status map[string]string
 
 	if idStr != "" {
-		// If idStr is provided, we are updating an existing discipline
-		id, err := strconv.ParseUint(idStr, 10, 64)
+		id, err := strconv.Atoi(idStr)
 		if err != nil {
 			return map[string]string{"status": "DISCIPLINA NÃO ATUALIZADA! ID inválido."}
 		}
@@ -46,7 +45,7 @@ func AddDisciplineService(interaction *discordgo.InteractionCreate, idStr string
 }
 
 func GetDisciplineByID(idStr string) model.Discipline {
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		log.Printf("Failed to parse id '%s': %v", idStr, err)
 		return model.Discipline{}
@@ -61,7 +60,7 @@ func GetAllDisciplines() []model.Discipline {
 }
 
 func DeleteDiscipline(idStr string) string {
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		log.Printf("Failed to parse id '%s': %v", idStr, err)
 		return "DISCIPLINA NÃO DELETADA! ID inválido."

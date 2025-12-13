@@ -50,6 +50,10 @@ func RegisterCommands(session *discordgo.Session) {
 			{"name": "tipo-merito", "description": "Tipo de mérito - Vantagem, Desvantagem, Antecedente"},
 			{"name": "merito", "description": "Fornece informações sobre um mérito específico"},
 		},
+		"update-merito": {
+			{"name": "tipo-merito", "description": "Tipo de mérito - Vantagem, Desvantagem, Antecedente"},
+			{"name": "merito", "description": "Merito a ser atualizado"},
+		},
 		"update-disciplina": {
 			{"name": "disciplina", "description": "Disciplina a ser atualizada"},
 		},
@@ -115,8 +119,9 @@ func RegisterCommands(session *discordgo.Session) {
 func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
 
 	if interaction.Type == discordgo.InteractionModalSubmit {
-		customID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[0]
-		customData := strings.Split(interaction.ModalSubmitData().CustomID, "|")[1]
+		modalData := interaction.ModalSubmitData()
+		customID := strings.Split(modalData.CustomID, "|")[0]
+		customData := strings.Split(modalData.CustomID, "|")[1]
 		log.Printf("CUSTOM ID: %s", customID)
 		switch customID {
 		case "add-discipline-modal":
@@ -138,9 +143,12 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			status := controller.UpdateClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		case "update-power-modal":
-			powerID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[1]
-			disciplineID := strings.Split(interaction.ModalSubmitData().CustomID, "|")[2]
+			powerID := strings.Split(modalData.CustomID, "|")[1]
+			disciplineID := strings.Split(modalData.CustomID, "|")[2]
 			status := controller.UpdatePower(s, interaction, powerID, disciplineID)
+			view.ResolveResponse(s, interaction, status)
+		case "update-merit-modal":
+			status := controller.UpdateMerit(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
 		default:
 			status := "Interação EM MODAL Cancelada"
@@ -167,6 +175,7 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			log.Printf("Selected disciplines for clan: %v", data.Values)
 		case "select-merit-kind":
 			meritKind := data.Values[0]
+			meritKind = controller.GetMeritKindName(meritKind)
 			view.AddMeritView(s, interaction, meritKind, nil)
 		case "confirm-delete-discipline":
 			disciplineID := strings.Split(data.CustomID, "|")[1]
@@ -223,20 +232,12 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 				for _, option := range interaction.ApplicationCommandData().Options {
 					if option.Name == "tipo-merito" {
 						chosenKind = option.StringValue()
-						break
 					}
 					if option.Focused {
 						query = strings.ToLower(option.StringValue())
 					}
 				}
-				switch chosenKind {
-				case "1":
-					chosenKind = "Vantagem"
-				case "2":
-					chosenKind = "Desvantagem"
-				case "3":
-					chosenKind = "Antecedente"
-				}
+				chosenKind = controller.GetMeritKindName(chosenKind)
 				view.MeritInfoView(s, interaction, query, controller.GetMeritsByKind(chosenKind))
 				return
 			}
@@ -247,7 +248,8 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		return
 	}
 
-	switch interaction.ApplicationCommandData().Name {
+	appData := interaction.ApplicationCommandData()
+	switch appData.Name {
 	case "ping":
 		s.InteractionRespond(
 			interaction.Interaction,
@@ -271,51 +273,57 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		checkGuildOwner(s, interaction)
 		view.StringSelectMeritKindView(s, interaction)
 	case "merito":
-		meritoID := interaction.ApplicationCommandData().Options[1].StringValue()
+		meritoID := appData.Options[1].StringValue()
+		meritoID = controller.GetMeritKindName(meritoID)
 		view.ShowMeritInfoView(s, interaction, controller.GetMeritByID(meritoID))
 	case "disciplina":
-		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
+		disciplinaID := appData.Options[0].StringValue()
 		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))
 	case "clan":
-		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		clanID := appData.Options[0].StringValue()
 		disciplines := controller.GetClanDisciplinesById(clanID)
 		view.ShowClanInfoView(s, interaction, controller.GetClanByID(clanID), disciplines)
 	case "poder":
-		power := controller.GetPowerById(interaction.ApplicationCommandData().Options[1].StringValue())
+		power := controller.GetPowerById(appData.Options[1].StringValue())
 		view.ShowPowerInfoView(s, interaction, power)
+	case "update-merito":
+		checkGuildOwner(s, interaction)
+		meritID := appData.Options[1].StringValue()
+		merit := controller.GetMeritByID(meritID)
+		view.AddMeritView(s, interaction, "", &merit)
 	case "update-disciplina":
 		checkGuildOwner(s, interaction)
-		discipline := controller.GetDisciplineByID(interaction.ApplicationCommandData().Options[0].StringValue())
+		discipline := controller.GetDisciplineByID(appData.Options[0].StringValue())
 		view.AddDisciplineView(s, interaction, &discipline)
 	case "update-clan":
 		checkGuildOwner(s, interaction)
-		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		clanID := appData.Options[0].StringValue()
 		selectedDisciplines := controller.GetClanDisciplinesById(clanID)
 		disciplines := controller.GetAllDisciplines()
 		view.StringSelectClanDisciplines(s, interaction, disciplines, selectedDisciplines, clanID)
 	case "update-poder":
 		checkGuildOwner(s, interaction)
-		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
-		powerID := interaction.ApplicationCommandData().Options[1].StringValue()
+		disciplineID := appData.Options[0].StringValue()
+		powerID := appData.Options[1].StringValue()
 		power := controller.GetPowerById(powerID)
 		view.AddPowerView(s, interaction, disciplineID, &power)
 	case "delete-disciplina":
 		checkGuildOwner(s, interaction)
-		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
+		disciplineID := appData.Options[0].StringValue()
 		view.ConfirmDeleteDiscipline(s, interaction, controller.GetDisciplineByID(disciplineID))
 	case "delete-clan":
 		checkGuildOwner(s, interaction)
-		clanID := interaction.ApplicationCommandData().Options[0].StringValue()
+		clanID := appData.Options[0].StringValue()
 		view.ConfirmDeleteClan(s, interaction, controller.GetClanByID(clanID))
 	case "delete-poder":
 		checkGuildOwner(s, interaction)
-		disciplineID := interaction.ApplicationCommandData().Options[0].StringValue()
+		disciplineID := appData.Options[0].StringValue()
 		discipline := controller.GetDisciplineByID(disciplineID)
-		powerID := interaction.ApplicationCommandData().Options[1].StringValue()
+		powerID := appData.Options[1].StringValue()
 		power := controller.GetPowerById(powerID)
 		view.ConfirmDeletePower(s, interaction, power, discipline.Name)
 	default:
-		status := fmt.Sprintf("Comando %s não reconhecido.", interaction.ApplicationCommandData().Name)
+		status := fmt.Sprintf("Comando %s não reconhecido.", appData.Name)
 		view.ResolveResponse(s, interaction, status)
 	}
 

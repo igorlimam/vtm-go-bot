@@ -19,3 +19,12 @@ func GetMeritByID(meritID string) model.Merit {
 func GetMeritsByKind(meritKind string) []model.Merit {
 	return service.GetMeritsByKind(meritKind)
 }
+
+func GetMeritKindName(kindID string) string {
+	return service.GetMeritKindName(kindID)
+}
+
+func UpdateMerit(s *discordgo.Session, interaction *discordgo.InteractionCreate, meritID string) string {
+	status := service.AddMeritService(interaction, meritID)["status"]
+	return status
+}

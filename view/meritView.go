@@ -13,15 +13,6 @@ func AddMeritView(s *discordgo.Session, interaction *discordgo.InteractionCreate
 	customID := "add-merit-modal|0"
 	title := "Adicionar Mérito"
 
-	switch meritKind {
-	case "1":
-		meritKind = "Vantagem"
-	case "2":
-		meritKind = "Desvantagem"
-	case "3":
-		meritKind = "Antecedente"
-	}
-
 	name := ""
 	description := ""
 	kind := meritKind

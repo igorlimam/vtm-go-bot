@@ -27,3 +27,16 @@ func GetMeritsByKind(kind string) []model.Merit {
 	GetByField(&merits, "kind", kind)
 	return merits
 }
+
+func UpdateMerit(id uint, name string, description string, kind string, levelsInfo string) map[string]string {
+
+	meritToBeUpdated := model.Merit{
+		ID:          id,
+		Name:        name,
+		Description: description,
+		Kind:        kind,
+		LevelsInfo:  levelsInfo,
+	}
+	UpdateTable(&meritToBeUpdated)
+	return map[string]string{"status": "Mérito atualizado com sucesso!"}
+}

@@ -10,7 +10,7 @@ import (
 
 func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId string, powerId string) map[string]string {
 	dataModal := ModalToMap(interaction)
-	disciplineIdUint, _ := strconv.ParseUint(disciplineId, 10, 64)
+	disciplineIdInt, _ := strconv.Atoi(disciplineId)
 
 	nameLevelType := SplitModalInput(dataModal["power-name-level-type"].(string), "|", 3)
 	name := nameLevelType[0]
@@ -30,13 +30,13 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 
 	if powerId != "" {
 		// Updating existing power
-		powerIdUint, err := strconv.ParseUint(powerId, 10, 64)
+		powerIdInt, err := strconv.Atoi(powerId)
 		if err != nil {
 			return map[string]string{"status": "PODER NÃO ATUALIZADO! ID inválido."}
 		}
 		status = repository.UpdatePower(
-			uint(powerIdUint),
-			uint(disciplineIdUint),
+			uint(powerIdInt),
+			uint(disciplineIdInt),
 			name,
 			dataModal["power-description"].(string),
 			dataModal["power-dice-pool"].(string),
@@ -49,7 +49,7 @@ func AddPowerService(interaction *discordgo.InteractionCreate, disciplineId stri
 		)
 	} else {
 		status = repository.AddPower(
-			uint(disciplineIdUint),
+			uint(disciplineIdInt),
 			name,
 			dataModal["power-description"].(string),
 			dataModal["power-dice-pool"].(string),
@@ -70,7 +70,7 @@ func GetAllPowers() []model.Power {
 }
 
 func GetDisciplinePowersByID(disciplineID string) []model.Power {
-	id, err := strconv.ParseUint(disciplineID, 10, 64)
+	id, err := strconv.Atoi(disciplineID)
 	if err != nil {
 		return []model.Power{}
 	}
@@ -79,7 +79,7 @@ func GetDisciplinePowersByID(disciplineID string) []model.Power {
 }
 
 func GetPowerById(powerID string) model.Power {
-	id, err := strconv.ParseUint(powerID, 10, 64)
+	id, err := strconv.Atoi(powerID)
 	if err != nil {
 		return model.Power{}
 	}
