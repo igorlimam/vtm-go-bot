@@ -32,6 +32,7 @@ func RegisterCommands(session *discordgo.Session) {
 		"add-disciplina": "Adiciona uma nova disciplina",
 		"add-poder":      "Adiciona um novo poder a uma disciplina existente",
 		"add-clan":       "Adiciona um novo clã",
+		"add-merito":     "Adiciona um novo mérito",
 	}
 
 	selectionCommands := map[string][]map[string]string{
@@ -74,20 +75,6 @@ func RegisterCommands(session *discordgo.Session) {
 			Name:        cmd,
 			Description: desc,
 		})
-	}
-
-	for name, description := range commands {
-		_, err := session.ApplicationCommandCreate(
-			session.State.User.ID,
-			session.State.Guilds[0].ID,
-			&discordgo.ApplicationCommand{
-				Name:        name,
-				Description: description,
-			},
-		)
-		if err != nil {
-			log.Fatalf("Cannot create '%v' command: %v", name, err)
-		}
 	}
 
 	for cmd, cmdMap := range selectionCommands {
@@ -140,6 +127,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 		case "add-clan-modal":
 			status := controller.AddClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
+		case "add-merit-modal":
+			status := controller.AddMerit(s, interaction)
+			view.ResolveResponse(s, interaction, status)
 		case "update-clan-modal":
 			status := controller.UpdateClan(s, interaction, customData)
 			view.ResolveResponse(s, interaction, status)
@@ -171,6 +161,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 			}
 
 			log.Printf("Selected disciplines for clan: %v", data.Values)
+		case "select-merit-kind":
+			meritKind := data.Values[0]
+			view.AddMeritView(s, interaction, meritKind, nil)
 		case "confirm-delete-discipline":
 			disciplineID := strings.Split(data.CustomID, "|")[1]
 			status := controller.DeleteDiscipline(s, interaction, disciplineID)
@@ -243,6 +236,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-clan":
 		checkGuildOwner(s, interaction)
 		view.StringSelectClanDisciplines(s, interaction, controller.GetAllDisciplines(), nil, "")
+	case "add-merito":
+		checkGuildOwner(s, interaction)
+		view.StringSelectMeritKindView(s, interaction)
 	case "disciplina":
 		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))

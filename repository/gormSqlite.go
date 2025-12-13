@@ -25,6 +25,7 @@ func CheckDDL() {
 	DB.AutoMigrate(&model.Discipline{})
 	DB.AutoMigrate(&model.Power{})
 	DB.AutoMigrate(&model.Clan{})
+	DB.AutoMigrate(&model.Merit{})
 }
 
 func InsertIntoTable(tableInstance interface{}) {
