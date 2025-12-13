@@ -2,6 +2,8 @@ package view
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"vtm-go-bot/model"
 
 	"github.com/bwmarrin/discordgo"
@@ -85,4 +87,62 @@ func StringSelectMeritKindView(s *discordgo.Session, interaction *discordgo.Inte
 	}
 
 	SelectMenu(s, interaction, options, customID, placeholder, contentPlaceholder, 1)
+}
+
+func MeritKindInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate) {
+
+	meritKinds := []map[string]string{
+		{"label": "Vantagem", "value": "1"},
+		{"label": "Desvantagem", "value": "2"},
+		{"label": "Antecedente", "value": "3"},
+	}
+
+	options := []map[string]string{}
+	for _, meritKind := range meritKinds {
+		options = append(options, map[string]string{
+			"label": meritKind["label"],
+			"value": meritKind["value"],
+		})
+	}
+
+	AutoComplete(s, interaction, options)
+}
+
+func MeritInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, query string, merits []model.Merit) {
+	log.Printf("MERITS: %v", merits)
+	options := []map[string]string{}
+	for _, merit := range merits {
+		cond := query == "" || strings.Contains(strings.ToLower(merit.Name), query)
+		if cond && (len(options) < 25) {
+			options = append(options, map[string]string{
+				"label": merit.Name,
+				"value": fmt.Sprintf("%d", merit.ID),
+			})
+		}
+	}
+
+	AutoComplete(s, interaction, options)
+}
+
+func ShowMeritInfoView(s *discordgo.Session, interaction *discordgo.InteractionCreate, merit model.Merit) {
+
+	title := merit.Name
+	description := merit.Description
+
+	embedFields := []map[string]string{}
+
+	embedFields = append(embedFields, map[string]string{
+		"name":   "Tipo",
+		"value":  merit.Kind,
+		"inline": "true",
+	})
+	if merit.LevelsInfo != "" {
+		embedFields = append(embedFields, map[string]string{
+			"name":   "Informações de Níveis",
+			"value":  merit.LevelsInfo,
+			"inline": "false",
+		})
+	}
+
+	EmbedMessage(s, interaction, embedFields, title, description)
 }

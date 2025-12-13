@@ -15,3 +15,15 @@ func AddMerit(name string, description string, kind string, levelsInfo string) m
 	InsertIntoTable(&meritToBeInserted)
 	return map[string]string{"status": "Mérito adicionado com sucesso!"}
 }
+
+func GetMeritByID(id uint) model.Merit {
+	var merit model.Merit
+	GetByID(&merit, id)
+	return merit
+}
+
+func GetMeritsByKind(kind string) []model.Merit {
+	var merits []model.Merit
+	GetByField(&merits, "kind", kind)
+	return merits
+}

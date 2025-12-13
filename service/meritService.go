@@ -1,6 +1,9 @@
 package service
 
 import (
+	"log"
+	"strconv"
+	"vtm-go-bot/model"
 	"vtm-go-bot/repository"
 
 	"github.com/bwmarrin/discordgo"
@@ -22,4 +25,17 @@ func AddMeritService(interaction *discordgo.InteractionCreate, meritID string) m
 	}
 
 	return status
+}
+
+func GetMeritByID(meritID string) model.Merit {
+	id, err := strconv.Atoi(meritID)
+	if err != nil {
+		log.Printf("Invalid merit ID: %v", err)
+		return model.Merit{}
+	}
+	return repository.GetMeritByID(uint(id))
+}
+
+func GetMeritsByKind(meritKind string) []model.Merit {
+	return repository.GetMeritsByKind(meritKind)
 }

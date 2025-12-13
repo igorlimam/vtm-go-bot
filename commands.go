@@ -46,6 +46,10 @@ func RegisterCommands(session *discordgo.Session) {
 			{"name": "disciplina", "description": "Disciplina do poder"},
 			{"name": "poder", "description": "Fornece informações sobre um poder específico"},
 		},
+		"merito": {
+			{"name": "tipo-merito", "description": "Tipo de mérito - Vantagem, Desvantagem, Antecedente"},
+			{"name": "merito", "description": "Fornece informações sobre um mérito específico"},
+		},
 		"update-disciplina": {
 			{"name": "disciplina", "description": "Disciplina a ser atualizada"},
 		},
@@ -209,6 +213,33 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 				view.PowerInfoView(s, interaction, query, disciplinePowers)
 				return
 			}
+			if opt.Focused && opt.Name == "tipo-merito" {
+				view.MeritKindInfoView(s, interaction)
+				return
+			}
+			if opt.Focused && opt.Name == "merito" {
+				chosenKind := ""
+				query := ""
+				for _, option := range interaction.ApplicationCommandData().Options {
+					if option.Name == "tipo-merito" {
+						chosenKind = option.StringValue()
+						break
+					}
+					if option.Focused {
+						query = strings.ToLower(option.StringValue())
+					}
+				}
+				switch chosenKind {
+				case "1":
+					chosenKind = "Vantagem"
+				case "2":
+					chosenKind = "Desvantagem"
+				case "3":
+					chosenKind = "Antecedente"
+				}
+				view.MeritInfoView(s, interaction, query, controller.GetMeritsByKind(chosenKind))
+				return
+			}
 		}
 	}
 
@@ -239,6 +270,9 @@ func RegisterHandlers(s *discordgo.Session, interaction *discordgo.InteractionCr
 	case "add-merito":
 		checkGuildOwner(s, interaction)
 		view.StringSelectMeritKindView(s, interaction)
+	case "merito":
+		meritoID := interaction.ApplicationCommandData().Options[1].StringValue()
+		view.ShowMeritInfoView(s, interaction, controller.GetMeritByID(meritoID))
 	case "disciplina":
 		disciplinaID := interaction.ApplicationCommandData().Options[0].StringValue()
 		view.ShowDisciplineInfoView(s, interaction, controller.GetDisciplineByID(disciplinaID))
